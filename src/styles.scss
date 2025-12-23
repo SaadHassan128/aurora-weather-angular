@@ -1,1 +1,217 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import '@fortawesome/fontawesome-free/css/all.css';
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --bg: #0e1117;
+  --card: rgba(255, 255, 255, 0.04);
+  --text: #00d9ff;
+  --text-secondary: #b366ff;
+  --muted: #c2cedb;
+  --accent: #00d9ff;
+  --accent-2: #ff006e;
+  --success: #76ff00;
+  --danger: #ff4757;
+  --warning: #ffa502;
+  --info: #0099ff;
+  --glass: rgba(255, 255, 255, 0.08);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+.theme-light {
+  --bg: #ffffff;
+  --card: rgba(255, 255, 255, 0.95);
+  --text: #0a1428;
+  --text-secondary: #495057;
+  --muted: #6c757d;
+  --accent: #0d6efd;
+  --accent-2: #8c40ff;
+  --success: #198754;
+  --danger: #dc3545;
+  --warning: #ff9800;
+  --info: #0dcaf0;
+  --glass: rgba(255, 255, 255, 0.9);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+body:not(.theme-light) {
+  background: radial-gradient(circle at 20% 20%, #0a2a4e 0%, #051016 40%, #000813 100%),
+    linear-gradient(135deg, rgba(0, 217, 255, 0.15) 0%, rgba(179, 102, 255, 0.15) 100%);
+}
+
+body.theme-light {
+  background: linear-gradient(135deg, #f0f4ff 0%, #fff5ff 50%, #fffbf0 100%);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-2);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text);
+}
+
+.section-title {
+  color: var(--text);
+}
+
+.fw-semibold,
+.fw-bold {
+  color: var(--text-secondary, var(--text));
+}
+
+.glass-card {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.section-title {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-title i {
+  color: var(--accent);
+  -webkit-text-fill-color: unset;
+}
+
+.pill {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.weather-bg-sunny {
+  background: linear-gradient(135deg, #ffcf71 0%, #f76b1c 100%);
+}
+
+.weather-bg-rainy {
+  background: linear-gradient(135deg, #5b86e5 0%, #36d1dc 100%);
+}
+
+.weather-bg-snowy {
+  background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+  color: #0d1b2a;
+}
+
+.weather-bg-night {
+  background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.skeleton {
+  display: inline-block;
+  width: 100%;
+  height: 1rem;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.08)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.text-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.theme-light .text-label {
+  color: var(--accent);
+}
+
+.text-muted {
+  color: var(--muted) !important;
+}
+
+.bg-dark-subtle {
+  color: var(--text);
+}
+
+::placeholder {
+  color: var(--muted);
+  opacity: 0.9;
+}
+
+.input-group-text {
+  color: var(--text);
+}
+
+.navbar .nav-link {
+  color: var(--text) !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+  color: var(--accent-2) !important;
+}

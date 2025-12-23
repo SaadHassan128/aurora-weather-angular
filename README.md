@@ -1,59 +1,49 @@
-# WeatherApp
+# Aurora Weather (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.2.
+Portfolio-grade Angular 17+ weather experience powered by WeatherAPI with caching, local persistence, responsive Bootstrap UI, charts, and an always-available sliding panel.
 
-## Development server
+## Setup
 
-To start a local development server, run:
+1. Install deps  
+   `npm install`
 
-```bash
-ng serve
-```
+2. Configure Stormglass API key
+   There are two supported options to provide the Stormglass API key (recommended to avoid committing secrets):
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Runtime file (local development - recommended):
 
-## Code scaffolding
+  - Edit `src/assets/runtime-env.js` and set `window.__env__.weatherApiKey = '<your-key>'`.
+  - This file is loaded at app startup and keeps secrets out of your TypeScript sources.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Build-time (not recommended for secrets):
+  - You may set `weatherApiKey` in `src/environments/environment.ts` and `src/environments/environment.development.ts` before building, but do NOT commit keys to version control.
 
-```bash
-ng generate component component-name
-```
+3. Run locally  
+   `npm start` then open `http://localhost:4200`. Ensure you have set a valid Stormglass API key using one of the methods above so live weather requests succeed.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+4. Production build  
+   `ng build --configuration=production --optimization=true`
 
-```bash
-ng generate --help
-```
+## Features
 
-## Building
+- WeatherAPI integration: current, 7-day forecast with alerts, history, and search/autocomplete.
+- Sliding left panel accessible on every page with mini widget, saved locations, and recent searches.
+- Local storage persistence for preferences (units, theme), saved locations, and cache with expiry.
+- Responsive pages: Dashboard, Current, Forecast, Search, Saved, Maps (Leaflet), Alerts, History, Settings, About.
+- Theming: light/dark/auto via CSS variables and smooth transitions.
+- Charts: temperature trend (ng2-charts/Chart.js) and responsive cards for hourly/daily outlooks.
+- Geolocation bootstrap with graceful fallback and rate-limit-aware HTTP interceptor.
+- Bootstrap 5 glassmorphism styling, icons (Bootstrap Icons/FontAwesome), and mobile-friendly layout.
 
-To build the project run:
+## Key data points surfaced
 
-```bash
-ng build
-```
+Current: temperature, feels-like, humidity, wind speed/direction, pressure, visibility, UV, precipitation, cloud cover, AQI (when available).  
+Forecast: hourly temps/precip, daily highs/lows, sunrise/sunset, UV, rain chances.  
+Alerts: headline, severity, effective/expiry, description.  
+History: single-date snapshot with highs/lows/UV/rain.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Notes
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Keyboard friendly: panel can be closed with Escape; quick search is debounced.
+- Map uses OpenStreetMap tiles via Leaflet; requires network access.
+- Remember to keep your API key private—do not commit it to version control.
