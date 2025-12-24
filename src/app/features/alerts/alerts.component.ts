@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
@@ -7,6 +7,7 @@ import { LocationService } from '../../core/services/location.service';
   selector: 'app-alerts',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="row g-3">
       <div class="col-12">
@@ -44,7 +45,7 @@ import { LocationService } from '../../core/services/location.service';
                 [class.active]="filterSeverity === 'extreme'"
                 (click)="filterSeverity = 'extreme'"
               >
-                <i class="bi bi-exclamation-circle"></i> Extreme
+                Extreme
               </button>
               <button
                 type="button"

@@ -1,7 +1,6 @@
-import { AfterViewInit, Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherStateService } from '../../core/services/weather-state.service';
-import * as L from 'leaflet';
 
 @Component({
   selector: 'app-maps',
@@ -24,23 +23,26 @@ import * as L from 'leaflet';
         width: 100%;
       }
     `
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapsComponent implements AfterViewInit {
   private readonly state = inject(WeatherStateService);
   @ViewChild('map', { static: true }) mapElement!: ElementRef<HTMLDivElement>;
-  map?: L.Map;
+  map?: any;
 
   ngAfterViewInit(): void {
     const loc = this.state.currentWeather()?.location;
     const lat = loc?.lat ?? 51.5072;
     const lon = loc?.lon ?? -0.1276;
 
-    this.map = L.map(this.mapElement.nativeElement).setView([lat, lon], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(this.map);
-    L.marker([lat, lon]).addTo(this.map);
+    import('leaflet').then((L) => {
+      this.map = L.map(this.mapElement.nativeElement).setView([lat, lon], 7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(this.map);
+      L.marker([lat, lon]).addTo(this.map);
+    });
   }
 }
 

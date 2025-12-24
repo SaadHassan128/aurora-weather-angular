@@ -1,16 +1,16 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
 import { NgChartsModule } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import type { ChartConfiguration } from 'chart.js';
+import type { ForecastHour, SavedLocation } from '../../core/models/weather.models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, NgChartsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="row g-3">
       <div class="col-12 col-lg-4" *ngIf="current() as current">
@@ -26,6 +26,7 @@ Chart.register(...registerables);
               [src]="current.condition.icon"
               width="72"
               height="72"
+              [alt]="current.condition.text || 'Weather icon'"
             />
           </div>
           <div class="mt-3 row text-center">
@@ -141,10 +142,15 @@ Chart.register(...registerables);
           <div class="d-flex flex-nowrap overflow-auto gap-3 pb-2">
             <div
               class="forecast-card p-3 rounded-4 bg-dark-subtle text-center"
-              *ngFor="let day of forecast()?.days"
+              *ngFor="let day of forecast()?.days; trackBy: trackByDate"
             >
               <div class="fw-semibold">{{ day.date }}</div>
-              <img [src]="day.condition.icon" width="48" height="48" alt="icon" />
+              <img
+                [src]="day.condition.icon"
+                width="48"
+                height="48"
+                [alt]="day.condition.text || 'Weather icon'"
+              />
               <div class="fw-bold">{{ day.maxtempC }}° / {{ day.mintempC }}°</div>
               <small class="text-muted">{{ day.condition.text }}</small>
             </div>
@@ -181,7 +187,7 @@ Chart.register(...registerables);
           <div class="mb-3">
             <div class="fw-semibold">Saved</div>
             <div
-              *ngFor="let s of locations.saved()"
+              *ngFor="let s of locations.saved(); trackBy: trackByName"
               class="d-flex justify-content-between align-items-center small text-muted py-1"
             >
               <div>{{ s.name }}</div>
@@ -191,7 +197,10 @@ Chart.register(...registerables);
           </div>
           <div>
             <div class="fw-semibold">Recent searches</div>
-            <div *ngFor="let r of locations.recent()" class="small text-muted py-1">
+            <div
+              *ngFor="let r of locations.recent(); trackBy: trackByRecent"
+              class="small text-muted py-1"
+            >
               {{ r.query }} <small class="text-muted">— {{ r.at | date : 'short' }}</small>
             </div>
             <div *ngIf="!locations.recent().length" class="text-muted small">
@@ -218,12 +227,12 @@ Chart.register(...registerables);
     `,
   ],
 })
-export class DashboardComponent {
-  private readonly state = inject(WeatherStateService);
+export class DashboardComponent implements OnInit {
+  private readonly weather = inject(WeatherStateService);
   readonly locations = inject(LocationService);
 
-  readonly current = computed(() => this.state.currentWeather());
-  readonly forecast = computed(() => this.state.forecast());
+  readonly current = computed(() => this.weather.currentWeather());
+  readonly forecast = computed(() => this.weather.forecast());
 
   selectedMetric: 'tempC' | 'humidity' | 'windKph' | 'precipMm' = 'tempC';
   countryQuery = '';
@@ -263,20 +272,20 @@ export class DashboardComponent {
   };
 
   readonly avgMetric = computed(() => {
-    const hours = this.forecast()?.days?.[0]?.hours ?? [];
+    const hours = (this.forecast()?.days?.[0]?.hours ?? []) as ForecastHour[];
     if (!hours.length) return 0;
-    const sum = hours.reduce((a, h) => a + this.valueByMetric(h), 0);
+    const sum = hours.reduce((a: number, h: ForecastHour) => a + this.valueByMetric(h), 0);
     return Math.round((sum / hours.length) * 10) / 10;
   });
 
   readonly highMetric = computed(() => {
-    const hours = this.forecast()?.days?.[0]?.hours ?? [];
-    return Math.max(...hours.map((h) => this.valueByMetric(h)), 0);
+    const hours = (this.forecast()?.days?.[0]?.hours ?? []) as ForecastHour[];
+    return Math.max(...hours.map((h: ForecastHour) => this.valueByMetric(h)), 0);
   });
 
   readonly lowMetric = computed(() => {
-    const hours = this.forecast()?.days?.[0]?.hours ?? [];
-    return Math.min(...hours.map((h) => this.valueByMetric(h)), 0);
+    const hours = (this.forecast()?.days?.[0]?.hours ?? []) as ForecastHour[];
+    return Math.min(...hours.map((h: ForecastHour) => this.valueByMetric(h)), 0);
   });
 
   get unitLabel(): string {
@@ -287,7 +296,7 @@ export class DashboardComponent {
   }
 
   get seriesChartData(): ChartConfiguration['data'] {
-    const hours = this.forecast()?.days?.[0]?.hours ?? [];
+    const hours = (this.forecast()?.days?.[0]?.hours ?? []) as ForecastHour[];
     const label =
       this.selectedMetric === 'tempC'
         ? 'Temperature (°C)'
@@ -297,7 +306,7 @@ export class DashboardComponent {
         ? 'Wind (kph)'
         : 'Precipitation (mm)';
     return {
-      labels: hours.map((h) => {
+      labels: hours.map((h: ForecastHour) => {
         const t = String(h.time);
         const timePart = t.includes('T') ? t.split('T')[1] : t.split(' ')[1] ?? t;
         return (timePart ?? '').slice(0, 5);
@@ -305,7 +314,7 @@ export class DashboardComponent {
       datasets: [
         {
           label,
-          data: hours.map((h) => this.valueByMetric(h)),
+          data: hours.map((h: ForecastHour) => this.valueByMetric(h)),
           tension: 0.4,
           fill: true,
           borderColor: '#00d9ff',
@@ -328,20 +337,30 @@ export class DashboardComponent {
     if (!this.countryQuery) return;
     this.locations.addRecent(this.countryQuery);
     this.locations.recordAction('view', this.countryQuery);
-    this.state.setLocation(this.countryQuery);
+    this.weather.setLocation(this.countryQuery);
   }
 
-  private valueByMetric(h: any): number {
+  private valueByMetric(h: ForecastHour): number {
     if (this.selectedMetric === 'tempC') return h.tempC ?? 0;
     if (this.selectedMetric === 'humidity') return h.humidity ?? 0;
     if (this.selectedMetric === 'windKph') return h.windKph ?? 0;
     return h.willItRain ? 1 : 0;
   }
 
-  openSaved(s: any) {
+  openSaved(s: SavedLocation) {
     const target = `${s.lat},${s.lon}`;
     this.locations.addRecent(s.name);
     this.locations.recordAction('view', s.name);
-    this.state.setLocation(target);
+    this.weather.setLocation(target);
   }
+
+  ngOnInit(): void {
+    import('chart.js').then(({ Chart, registerables }) => {
+      Chart.register(...registerables);
+    });
+  }
+
+  trackByDate = (_: number, d: any) => d?.date;
+  trackByName = (_: number, s: any) => s?.name;
+  trackByRecent = (_: number, r: any) => r?.query + '_' + (r?.at ?? '');
 }

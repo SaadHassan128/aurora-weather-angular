@@ -1,6 +1,5 @@
 @use 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
-@import '@fortawesome/fontawesome-free/css/all.css';
 @import 'leaflet/dist/leaflet.css';
 
 :root {
@@ -55,6 +54,28 @@ body.theme-light {
   background: linear-gradient(135deg, #f0f4ff 0%, #fff5ff 50%, #fffbf0 100%);
 }
 
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.visually-hidden-focusable:focus,
+.visually-hidden-focusable:focus-within {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+}
 a {
   color: var(--accent);
   text-decoration: none;

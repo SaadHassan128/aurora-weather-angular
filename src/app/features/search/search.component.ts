@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
@@ -12,6 +12,7 @@ import { LocationSummary } from '../../core/models/weather.models';
   selector: 'app-search',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="glass-card p-4">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -54,7 +55,7 @@ import { LocationSummary } from '../../core/models/weather.models';
       </div>
 
       <div class="row g-3 mt-3">
-        <div class="col-12 col-md-6 col-lg-4" *ngFor="let loc of results">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let loc of results; trackBy: trackByLocation">
           <div class="p-3 rounded-4 bg-dark-subtle h-100 d-flex flex-column">
             <div class="fw-semibold">{{ loc.name }}</div>
             <small class="text-muted">{{ loc.region }} • {{ loc.country }}</small>
@@ -151,4 +152,6 @@ export class SearchComponent {
     this.locations.history.set([]);
     this.locations.removeAllHistory();
   }
+
+  trackByLocation = (_: number, loc: LocationSummary) => loc?.name + '_' + loc?.lat + '_' + loc?.lon;
 }

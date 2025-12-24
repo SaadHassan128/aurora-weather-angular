@@ -1,14 +1,15 @@
 <div class="app-shell">
   <app-header></app-header>
-  <main class="container-fluid py-3 position-relative">
+  <main id="main" class="container-fluid py-3 position-relative">
     <div
       class="position-absolute top-0 start-50 translate-middle-x mt-2"
       *ngIf="weather.isLoading()"
+      aria-live="polite"
     >
       <span class="spinner-border spinner-border-sm text-info"></span>
       <small class="text-muted ms-2">Refreshing latest data...</small>
     </div>
-    <div *ngIf="weather.error()" class="alert alert-danger mt-2">
+    <div *ngIf="weather.error()" class="alert alert-danger mt-2" role="alert" aria-live="assertive">
       {{ weather.error() }}
     </div>
     <router-outlet></router-outlet>

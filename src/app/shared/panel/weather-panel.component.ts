@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
@@ -29,7 +29,12 @@ import { SavedLocation } from '../../core/models/weather.models';
 
       <div class="mini-widget" *ngIf="weather.currentWeather() as current">
         <div class="d-flex align-items-center gap-3">
-          <img [src]="current.condition.icon" width="52" height="52" alt="icon" />
+          <img
+            [src]="current.condition.icon"
+            width="52"
+            height="52"
+            [alt]="current.condition.text || 'Weather icon'"
+          />
           <div>
             <div class="fs-4 fw-bold">{{ current.tempC }}°C</div>
             <div class="text-muted">{{ current.condition.text }}</div>
@@ -63,7 +68,9 @@ import { SavedLocation } from '../../core/models/weather.models';
               </button>
             </div>
           </div>
-          <div class="text-muted small" *ngIf="!locations.saved().length">No saved locations yet.</div>
+          <div class="text-muted small" *ngIf="!locations.saved().length">
+            No saved locations yet.
+          </div>
         </div>
       </div>
 
@@ -143,8 +150,9 @@ import { SavedLocation } from '../../core/models/weather.models';
           transform: translateX(-50%);
         }
       }
-    `
-  ]
+    `,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeatherPanelComponent {
   readonly open = signal(false);
@@ -194,4 +202,3 @@ export class WeatherPanelComponent {
     this.close();
   }
 }
-

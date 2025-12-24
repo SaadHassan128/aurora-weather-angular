@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LocationService } from '../../core/services/location.service';
 import { WeatherStateService } from '../../core/services/weather-state.service';
@@ -14,7 +14,7 @@ import { WeatherStateService } from '../../core/services/weather-state.service';
         <span>Saved locations</span>
       </div>
       <div class="row g-3">
-        <div class="col-12 col-md-6 col-lg-4" *ngFor="let loc of locations.saved(); let i = index">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let loc of locations.saved(); trackBy: trackByName">
           <div class="p-3 rounded-4 bg-dark-subtle h-100 d-flex flex-column">
             <div class="d-flex justify-content-between align-items-center">
               <div>
@@ -41,6 +41,7 @@ import { WeatherStateService } from '../../core/services/weather-state.service';
       <div *ngIf="!locations.saved().length" class="text-muted">No saved locations yet.</div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SavedComponent {
   readonly locations = inject(LocationService);
@@ -60,4 +61,6 @@ export class SavedComponent {
   remove(name: string) {
     this.locations.removeLocation(name);
   }
+
+  trackByName = (_: number, loc: any) => loc?.name;
 }

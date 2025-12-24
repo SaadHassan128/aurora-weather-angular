@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
@@ -7,6 +7,7 @@ import { LocationService } from '../../core/services/location.service';
   selector: 'app-forecast',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="row g-3">
       <div class="col-12">
@@ -31,7 +32,12 @@ import { LocationService } from '../../core/services/location.service';
               style="min-width: 120px"
             >
               <div class="fw-semibold">{{ hour.time }}</div>
-              <img [src]="hour.condition.icon" width="42" height="42" alt="icon" />
+              <img
+                [src]="hour.condition.icon"
+                width="42"
+                height="42"
+                [alt]="hour.condition.text || 'Weather icon'"
+              />
               <div class="fw-bold">{{ hour.tempC }}°</div>
               <small class="text-muted">Rain {{ hour.chanceOfRain }}%</small>
             </div>
@@ -53,7 +59,12 @@ import { LocationService } from '../../core/services/location.service';
                     <div class="fw-semibold">{{ day.date }}</div>
                     <small class="text-muted">{{ day.condition.text }}</small>
                   </div>
-                  <img [src]="day.condition.icon" width="42" height="42" />
+                  <img
+                    [src]="day.condition.icon"
+                    width="42"
+                    height="42"
+                    [alt]="day.condition.text || 'Weather icon'"
+                  />
                 </div>
                 <div class="d-flex justify-content-between mt-2">
                   <div>High: {{ day.maxtempC }}°</div>

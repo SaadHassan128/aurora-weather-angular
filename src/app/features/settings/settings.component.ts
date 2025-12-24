@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PreferencesService } from '../../core/services/preferences.service';
 
@@ -6,6 +6,7 @@ import { PreferencesService } from '../../core/services/preferences.service';
   selector: 'app-settings',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="glass-card p-4">
       <div class="section-title">

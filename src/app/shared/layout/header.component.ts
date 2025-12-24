@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -15,23 +15,21 @@ import { LocationSummary } from '../../core/models/weather.models';
   imports: [CommonModule, RouterLink, RouterLinkActive, ReactiveFormsModule],
   template: `
     <nav class="navbar navbar-expand-lg px-3 py-3">
-      <a class="navbar-brand fw-bold text-white" routerLink="/dashboard">
+      <a class="navbar-brand fw-bold text-white" routerLink="/dashboard" aria-label="Aurora Weather Home">
         <i class="bi bi-cloud-sun-fill text-warning me-2"></i>
         Aurora Weather
       </a>
       <button
         class="navbar-toggler text-white"
         type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navMenu"
+        [attr.aria-expanded]="menuOpen()"
         aria-controls="navMenu"
-        aria-expanded="false"
         aria-label="Toggle navigation"
-      >
+        (click)="toggleMenu()">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navMenu">
+      <div class="collapse navbar-collapse" [class.show]="menuOpen()" id="navMenu">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item" routerLinkActive="active"><a class="nav-link" routerLink="/dashboard">Dashboard</a></li>
           <li class="nav-item" routerLinkActive="active"><a class="nav-link" routerLink="/current">Current</a></li>
@@ -94,7 +92,8 @@ import { LocationSummary } from '../../core/models/weather.models';
         overflow-y: auto;
       }
     `
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit {
   private readonly api = inject(WeatherApiService);
@@ -105,6 +104,7 @@ export class HeaderComponent implements OnInit {
   searchControl = new FormControl('');
   suggestions: LocationSummary[] = [];
   theme = this.preferences.preferences().theme;
+  readonly menuOpen = signal(false);
 
   ngOnInit(): void {
     this.searchControl.valueChanges
@@ -130,6 +130,10 @@ export class HeaderComponent implements OnInit {
 
   refresh() {
     this.weather.reload();
+  }
+
+  toggleMenu() {
+    this.menuOpen.update((v) => !v);
   }
 }
 

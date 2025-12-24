@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './shared/layout/header.component';
@@ -11,7 +11,8 @@ import { WeatherStateService } from './core/services/weather-state.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, HeaderComponent, WeatherPanelComponent],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class App implements OnInit {
   private readonly preferences = inject(PreferencesService);
