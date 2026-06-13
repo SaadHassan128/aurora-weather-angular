@@ -141,7 +141,23 @@ export class HeaderComponent implements OnInit {
 
   @HostListener('window:scroll')
   onScroll() {
-    if (typeof window !== 'undefined') this.scrolled.set(window.scrollY > 40);
+    if (typeof window === 'undefined') return;
+    const s = window.scrollY > 40;
+    if (s !== this.scrolled()) this.scrolled.set(s);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: MouseEvent) {
+    if (this.moreOpen() && !(e.target as HTMLElement).closest('.more')) {
+      this.moreOpen.set(false);
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    if (typeof window !== 'undefined' && window.innerWidth >= 992 && this.menuOpen()) {
+      this.closeMenu();
+    }
   }
 
   @HostListener('document:keydown.escape')
