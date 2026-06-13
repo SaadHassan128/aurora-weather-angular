@@ -9,10 +9,10 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
   imports: [CommonModule, RevealDirective],
   template: `
     <div class="card p-3" appReveal>
-      <div class="section-title">
-        <i class="bi bi-globe-americas"></i>
+      <h2 class="section-title">
+        <i class="bi bi-globe-americas" aria-hidden="true"></i>
         <span>Weather map</span>
-      </div>
+      </h2>
       <div #map class="map-container"></div>
       <div class="text-label mt-2">Powered by OpenStreetMap tiles.</div>
     </div>

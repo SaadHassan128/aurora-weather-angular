@@ -182,10 +182,6 @@ export class HeaderComponent implements OnInit {
 
   toggleTheme() {
     this.theme = this.theme === 'dark' ? 'light' : 'dark';
-    if (typeof document !== 'undefined') {
-      document.documentElement.setAttribute('data-theme', this.theme);
-      try { localStorage.setItem('aurora-theme', this.theme); } catch {}
-    }
     this.preferences.update({ theme: this.theme });
   }
 

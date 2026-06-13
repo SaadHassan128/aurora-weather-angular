@@ -13,10 +13,10 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
     <div class="row g-3">
       <div class="col-12">
         <div class="card p-4 mb-3">
-          <div class="section-title">
-            <i class="bi bi-exclamation-triangle"></i>
+          <h2 class="section-title">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <span>Weather Alerts</span>
-          </div>
+          </h2>
           <div class="text-muted small">
             Location: <strong>{{ locationName() || 'Current Location' }}</strong> •
             {{ locationCountry() || 'Unknown' }}

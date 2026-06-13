@@ -12,10 +12,10 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
   template: `
     <div class="settings-grid">
       <section class="card p-4" appReveal [appReveal]="0">
-        <div class="section-title">
-          <i class="bi bi-rulers"></i>
+        <h2 class="section-title">
+          <i class="bi bi-rulers" aria-hidden="true"></i>
           <span>Units</span>
-        </div>
+        </h2>
         <p class="text-muted setting-help">Choose the measurement units used across forecasts and details.</p>
 
         <div class="setting-row">

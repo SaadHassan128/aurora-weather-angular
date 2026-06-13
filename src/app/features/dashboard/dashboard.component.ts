@@ -52,10 +52,10 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
 
       <div class="card bento-chart" [appReveal]="1">
           <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-            <div class="section-title mb-0">
-              <i class="bi bi-graph-up"></i>
+            <h2 class="section-title mb-0">
+              <i class="bi bi-graph-up" aria-hidden="true"></i>
               <span>Next hours - {{ currentLocationName() }}</span>
-            </div>
+            </h2>
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <div class="metric-toggle" role="group">
                 <button
@@ -136,10 +136,10 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       </div>
 
       <div class="card bento-forecast" [appReveal]="2">
-          <div class="section-title">
-            <i class="bi bi-calendar-week"></i>
+          <h2 class="section-title">
+            <i class="bi bi-calendar-week" aria-hidden="true"></i>
             <span>Daily forecast - {{ forecastLocationName() }}</span>
-          </div>
+          </h2>
           <div class="d-flex flex-nowrap overflow-auto gap-3 pb-2">
             <div
               class="forecast-card text-center"
@@ -150,6 +150,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
                 [src]="day.condition.icon"
                 width="48"
                 height="48"
+                loading="lazy"
                 [alt]="day.condition.text || 'Weather icon'"
               />
               <div class="fw-bold">{{ day.maxtempC }}° / {{ day.mintempC }}°</div>
@@ -159,10 +160,10 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       </div>
 
       <div class="card bento-alerts" [appReveal]="3">
-          <div class="section-title">
-            <i class="bi bi-exclamation-triangle"></i>
+          <h2 class="section-title">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <span>Alerts - {{ forecastLocationName() }}</span>
-          </div>
+          </h2>
           <div *ngIf="forecast()?.alerts?.length; else noAlerts" class="d-flex flex-column gap-2">
             <div
               class="p-2 rounded-3 alert-chip"
@@ -178,10 +179,10 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       </div>
 
       <div class="card bento-saved" [appReveal]="4">
-          <div class="section-title">
-            <i class="bi bi-bookmarks"></i>
+          <h2 class="section-title">
+            <i class="bi bi-bookmarks" aria-hidden="true"></i>
             <span>Saved & History</span>
-          </div>
+          </h2>
           <div class="mb-3">
             <div class="fw-semibold">Saved</div>
             <div

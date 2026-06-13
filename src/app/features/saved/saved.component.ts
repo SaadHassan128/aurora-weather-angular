@@ -11,10 +11,10 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
   imports: [CommonModule, RouterLink, RevealDirective],
   template: `
     <div class="card p-4">
-      <div class="section-title">
-        <i class="bi bi-bookmark-heart"></i>
+      <h2 class="section-title">
+        <i class="bi bi-bookmark-heart" aria-hidden="true"></i>
         <span>Saved locations</span>
-      </div>
+      </h2>
 
       <!-- Saved cards -->
       <div class="saved-grid" *ngIf="locations.saved().length">

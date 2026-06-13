@@ -16,10 +16,10 @@ import { ForecastDay } from '../../core/models/weather.models';
     <div class="history-stack">
       <!-- Date picker bar -->
       <div class="card">
-        <div class="section-title">
-          <i class="bi bi-clock-history"></i>
+        <h2 class="section-title">
+          <i class="bi bi-clock-history" aria-hidden="true"></i>
           <span>Historical Weather Data</span>
-        </div>
+        </h2>
         <div class="text-label">
           Location: {{ locationName() || 'Current Location' }} &middot;
           {{ locationCountry() || 'Unknown' }}

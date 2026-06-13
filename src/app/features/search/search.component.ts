@@ -18,10 +18,10 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
     <div class="card search-card">
       <div class="search-head">
         <div>
-          <div class="section-title mb-0">
-            <i class="bi bi-search"></i>
+          <h2 class="section-title mb-0">
+            <i class="bi bi-search" aria-hidden="true"></i>
             <span>Search locations</span>
-          </div>
+          </h2>
           <div class="text-label">Type a city, ZIP, or coordinates</div>
         </div>
         <div class="recents" *ngIf="locations.recent().length">

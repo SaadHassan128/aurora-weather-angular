@@ -14,10 +14,10 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
     <div class="forecast-stack">
       <!-- Header card -->
       <div class="card header-card" appTilt>
-        <div class="section-title">
-          <i class="bi bi-geo-alt"></i>
+        <h2 class="section-title">
+          <i class="bi bi-geo-alt" aria-hidden="true"></i>
           <span>Forecast for {{ displayName() }}</span>
-        </div>
+        </h2>
         <div class="text-label" *ngIf="displayCountry()">{{ displayCountry() }}</div>
       </div>
 
