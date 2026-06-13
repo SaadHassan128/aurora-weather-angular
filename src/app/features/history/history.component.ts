@@ -146,16 +146,16 @@ import { ForecastDay } from '../../core/models/weather.models';
       </div>
 
       <!-- Loading skeleton -->
-      <div class="card" *ngIf="isLoading">
+      <div class="card" *ngIf="isLoading" aria-busy="true" aria-live="polite">
         <div class="section-title sm">
-          <i class="bi bi-clock-history"></i>
+          <i class="bi bi-clock-history" aria-hidden="true"></i>
           <span>Loading historical data…</span>
         </div>
-        <div class="tile-row">
+        <div class="tile-row" aria-hidden="true">
           <div class="tile skeleton"></div>
           <div class="tile skeleton"></div>
         </div>
-        <div class="tile skeleton mt-2"></div>
+        <div class="tile skeleton mt-2" aria-hidden="true"></div>
       </div>
 
       <!-- Error state -->

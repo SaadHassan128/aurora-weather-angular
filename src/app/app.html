@@ -6,7 +6,7 @@
       *ngIf="weather.isLoading()"
       aria-live="polite"
     >
-      <span class="spinner-border spinner-border-sm text-info"></span>
+      <span class="spinner-border spinner-border-sm" style="color: var(--accent)"></span>
       <small class="text-muted ms-2">Refreshing latest data...</small>
     </div>
     <div *ngIf="weather.error()" class="alert alert-danger mt-2" role="alert" aria-live="assertive">

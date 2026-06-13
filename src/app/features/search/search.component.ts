@@ -53,7 +53,8 @@ import { RevealDirective } from '../../shared/directives/reveal.directive';
       </div>
 
       <!-- Loading skeletons -->
-      <div class="result-grid" *ngIf="loading">
+      <span class="visually-hidden" aria-live="polite" *ngIf="loading">Searching locations…</span>
+      <div class="result-grid" *ngIf="loading" aria-busy="true" aria-hidden="true">
         <div class="card result-tile skeleton-tile" *ngFor="let s of [1, 2, 3, 4, 5, 6]">
           <span class="skeleton skeleton-line lg"></span>
           <span class="skeleton skeleton-line sm"></span>

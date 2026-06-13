@@ -13,7 +13,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- 1. Error state (highest priority) -->
-    <div class="card error-card" *ngIf="error() as message">
+    <div class="card error-card" *ngIf="error() as message" role="alert">
       <i class="bi bi-exclamation-triangle warn-icon" aria-hidden="true"></i>
       <div>
         <div class="section-title mb-1">Something went wrong</div>
@@ -26,8 +26,14 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
 
     <!-- 2. Loading state (no data yet) -->
     <ng-container *ngIf="!error()">
-      <div class="card loading-hero" *ngIf="isLoading() && !current()">
-        <div class="hero-skeleton">
+      <div
+        class="card loading-hero"
+        *ngIf="isLoading() && !current()"
+        aria-busy="true"
+        aria-live="polite"
+      >
+        <span class="visually-hidden">Loading current conditions…</span>
+        <div class="hero-skeleton" aria-hidden="true">
           <div class="skel-stack">
             <div class="skeleton" style="width: 40%; height: 0.9rem;"></div>
             <div class="skeleton" style="width: 60%; height: 1.8rem;"></div>
@@ -36,7 +42,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           <div class="skeleton" style="width: 96px; height: 96px; border-radius: 50%;"></div>
         </div>
       </div>
-      <div class="metric-grid" *ngIf="isLoading() && !current()">
+      <div class="metric-grid" *ngIf="isLoading() && !current()" aria-hidden="true">
         <div class="card metric-tile" *ngFor="let i of skeletonTiles">
           <div class="skeleton" style="width: 55%; height: 0.8rem;"></div>
           <div class="skeleton" style="width: 70%; height: 1.4rem; margin-top: 0.6rem;"></div>
@@ -53,7 +59,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           <div class="text-muted">{{ displayCountry() }}</div>
         </div>
         <div class="hero-temp">
-          <span class="temp-value">{{ current.tempC }}°C</span>
+          <span class="temp-value" [attr.aria-label]="current.tempC + ' degrees Celsius'">{{ current.tempC }}°C</span>
           <div class="text-muted condition-text">{{ current.condition.text }}</div>
         </div>
         <img

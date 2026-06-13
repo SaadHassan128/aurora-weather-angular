@@ -103,23 +103,27 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           <div *ngIf="forecast()?.days?.[0]?.hours?.length; else noData">
             <canvas
               baseChart
+              role="img"
+              [attr.aria-label]="
+                'Line chart of ' + chartMetricLabel() + ' over the next hours'
+              "
               [data]="seriesChartData"
               [options]="chartOptions"
               [type]="'line'"
               height="300"
             ></canvas>
-            <div class="d-flex justify-content-around mt-3 pt-2 border-top border-secondary">
+            <div class="d-flex justify-content-around mt-3 pt-2 stat-divider">
               <div class="text-center">
                 <div class="text-muted small">Avg</div>
-                <div class="fw-bold text-success">{{ avgMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-success">{{ avgMetric() }}{{ unitLabel }}</div>
               </div>
               <div class="text-center">
                 <div class="text-muted small">High</div>
-                <div class="fw-bold text-danger">{{ highMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-danger">{{ highMetric() }}{{ unitLabel }}</div>
               </div>
               <div class="text-center">
                 <div class="text-muted small">Low</div>
-                <div class="fw-bold text-info">{{ lowMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-accent">{{ lowMetric() }}{{ unitLabel }}</div>
               </div>
             </div>
           </div>
@@ -161,7 +165,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           </div>
           <div *ngIf="forecast()?.alerts?.length; else noAlerts" class="d-flex flex-column gap-2">
             <div
-              class="p-2 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25"
+              class="p-2 rounded-3 alert-chip"
               *ngFor="let alert of forecast()?.alerts"
             >
               <div class="fw-semibold">{{ alert.headline }}</div>
@@ -245,6 +249,22 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
         background: var(--surface-2);
         border: 1px solid var(--border);
       }
+      .alert-chip {
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+        border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+      }
+      .stat-divider {
+        border-top: 1px solid var(--border);
+      }
+      .stat-success {
+        color: var(--success);
+      }
+      .stat-danger {
+        color: var(--danger);
+      }
+      .stat-accent {
+        color: var(--accent);
+      }
       .metric-toggle {
         display: inline-flex;
         gap: 0.35rem;
@@ -322,6 +342,19 @@ export class DashboardComponent implements OnInit {
   readonly forecastLocationName = computed(() => {
     return this.forecast()?.location?.name || 'Forecast Location';
   });
+
+  chartMetricLabel(): string {
+    switch (this.selectedMetric) {
+      case 'tempC':
+        return 'temperature';
+      case 'humidity':
+        return 'humidity';
+      case 'windKph':
+        return 'wind speed';
+      default:
+        return 'precipitation';
+    }
+  }
 
   readonly chartOptions: ChartConfiguration['options'] = {
     responsive: true,

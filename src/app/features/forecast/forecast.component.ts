@@ -22,7 +22,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       </div>
 
       <!-- Error state (highest priority) -->
-      <div class="card" *ngIf="error(); else loadingBlock">
+      <div class="card" *ngIf="error(); else loadingBlock" role="alert">
         <div class="section-title">
           <i class="bi bi-exclamation-triangle"></i>
           <span>Something went wrong</span>
@@ -37,7 +37,8 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       <ng-template #loadingBlock>
         <!-- Loading skeleton -->
         <ng-container *ngIf="isLoading() && !forecast(); else contentBlock">
-          <div class="card">
+          <span class="visually-hidden" aria-live="polite">Loading forecast…</span>
+          <div class="card" aria-busy="true" aria-hidden="true">
             <div class="section-title">
               <i class="bi bi-clock-history"></i>
               <span>Hourly (48h)</span>
@@ -46,7 +47,7 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
               <div class="hour-tile skeleton" *ngFor="let s of [1, 2, 3, 4, 5, 6, 7, 8]"></div>
             </div>
           </div>
-          <div class="card">
+          <div class="card" aria-hidden="true">
             <div class="section-title">
               <i class="bi bi-calendar3"></i>
               <span>Next 7 days</span>
