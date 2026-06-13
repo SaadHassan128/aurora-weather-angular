@@ -78,7 +78,7 @@ import { LocationSummary } from '../../core/models/weather.models';
         backdrop-filter: blur(12px);
       }
       .nav-link {
-        color: var(--muted);
+        color: var(--text-muted);
       }
       .nav-link.active,
       .nav-link:hover {
@@ -103,7 +103,10 @@ export class HeaderComponent implements OnInit {
 
   searchControl = new FormControl('');
   suggestions: LocationSummary[] = [];
-  theme = this.preferences.preferences().theme;
+  theme: 'dark' | 'light' =
+    (typeof document !== 'undefined' &&
+      (document.documentElement.getAttribute('data-theme') as 'dark' | 'light')) ||
+    'dark';
   readonly menuOpen = signal(false);
 
   ngOnInit(): void {
@@ -125,6 +128,10 @@ export class HeaderComponent implements OnInit {
 
   toggleTheme() {
     this.theme = this.theme === 'dark' ? 'light' : 'dark';
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', this.theme);
+      try { localStorage.setItem('aurora-theme', this.theme); } catch {}
+    }
     this.preferences.update({ theme: this.theme });
   }
 

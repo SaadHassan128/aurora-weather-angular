@@ -32,14 +32,22 @@ export class PreferencesService {
   }
 
   private applyTheme(theme: PreferenceState['theme']) {
-    const body = document.body;
-    body.classList.remove('theme-light', 'theme-dark');
+    if (typeof document === 'undefined') return;
+    let resolved: 'dark' | 'light';
     if (theme === 'auto') {
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      body.classList.add(isDark ? 'theme-dark' : 'theme-light');
-      return;
+      const prefersDark =
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+      resolved = prefersDark ? 'dark' : 'light';
+    } else {
+      resolved = theme === 'dark' ? 'dark' : 'light';
     }
-    body.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
+    document.documentElement.setAttribute('data-theme', resolved);
+    try {
+      localStorage.setItem('aurora-theme', resolved);
+    } catch {}
+    // clean up any legacy body classes from the old theming mechanism
+    document.body.classList.remove('theme-light', 'theme-dark');
   }
 }
 
