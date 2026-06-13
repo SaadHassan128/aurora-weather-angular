@@ -432,7 +432,7 @@ describe('RevealDirective', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm test -- --watch=false --filter reveal.directive`
+Run: `npm test -- --watch=false`
 Expected: FAIL — cannot find `./reveal.directive`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -494,7 +494,7 @@ export class RevealDirective implements OnInit, OnDestroy {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm test -- --watch=false --filter reveal.directive`
+Run: `npm test -- --watch=false`
 Expected: PASS (both specs). Note: jsdom lacks `IntersectionObserver`, so the directive takes the fallback path and still adds `reveal` + sets the delay — exactly what the tests assert.
 
 - [ ] **Step 5: Commit**
@@ -547,7 +547,7 @@ describe('TiltDirective', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm test -- --watch=false --filter tilt.directive`
+Run: `npm test -- --watch=false`
 Expected: FAIL — cannot find `./tilt.directive`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -606,7 +606,7 @@ export class TiltDirective implements OnInit {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm test -- --watch=false --filter tilt.directive`
+Run: `npm test -- --watch=false`
 Expected: PASS (both specs).
 
 - [ ] **Step 5: Commit**
@@ -674,7 +674,7 @@ describe('MoodService', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm test -- --watch=false --filter mood.service`
+Run: `npm test -- --watch=false`
 Expected: FAIL — cannot find `./mood.service`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -709,7 +709,7 @@ export class MoodService {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm test -- --watch=false --filter mood.service`
+Run: `npm test -- --watch=false`
 Expected: PASS (all 5 specs).
 
 - [ ] **Step 5: Commit**
