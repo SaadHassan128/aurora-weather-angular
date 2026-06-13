@@ -10,19 +10,30 @@ import { SavedLocation } from '../../core/models/weather.models';
   standalone: true,
   imports: [NgClass, NgIf, NgFor],
   template: `
-    <button class="panel-trigger btn btn-primary shadow" (click)="toggle()">
+    <button
+      class="panel-trigger"
+      type="button"
+      aria-label="Open weather panel"
+      (click)="toggle()"
+    >
       <i class="bi bi-cloud-sun-fill"></i>
       <span class="ms-2">{{ weather.currentWeather()?.tempC ?? '--' }}°</span>
     </button>
 
     <div class="backdrop" *ngIf="open()" (click)="close()"></div>
-    <aside class="panel glass-card" [ngClass]="{ open: open() }">
+    <aside
+      class="panel"
+      role="dialog"
+      aria-label="Weather panel"
+      [attr.aria-modal]="open() ? 'true' : null"
+      [ngClass]="{ open: open() }"
+    >
       <header class="d-flex justify-content-between align-items-center mb-3">
         <div>
           <div class="fw-bold">Weather Panel</div>
           <small class="text-muted">Quick access anywhere</small>
         </div>
-        <button class="btn btn-sm btn-outline-light" (click)="close()">
+        <button class="icon-btn" type="button" aria-label="Close panel" (click)="close()">
           <i class="bi bi-x-lg"></i>
         </button>
       </header>
@@ -33,6 +44,7 @@ import { SavedLocation } from '../../core/models/weather.models';
             [src]="current.condition.icon"
             width="52"
             height="52"
+            loading="lazy"
             [alt]="current.condition.text || 'Weather icon'"
           />
           <div>
@@ -51,16 +63,19 @@ import { SavedLocation } from '../../core/models/weather.models';
         <div class="d-flex flex-column gap-2">
           <div
             *ngFor="let loc of locations.saved()"
-            class="d-flex justify-content-between align-items-center p-2 rounded-3 bg-dark"
+            class="saved-row d-flex justify-content-between align-items-center"
           >
             <div>
               <div class="fw-semibold">{{ loc.name }}</div>
               <small class="text-muted">{{ loc.country }}</small>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-outline-info" (click)="switch(loc.name)">Switch</button>
+              <button class="btn-outline-accent btn-sm" type="button" (click)="switch(loc.name)">
+                Switch
+              </button>
               <button
-                class="btn btn-sm btn-outline-warning"
+                class="btn-outline-accent btn-sm"
+                type="button"
                 [disabled]="loc.default"
                 (click)="makeDefault(loc.name)"
               >
@@ -82,7 +97,8 @@ import { SavedLocation } from '../../core/models/weather.models';
         <div class="d-flex flex-wrap gap-2">
           <button
             *ngFor="let recent of locations.recent()"
-            class="btn btn-sm btn-outline-light"
+            class="pill"
+            type="button"
             (click)="switchByQuery(recent.query)"
           >
             {{ recent.query }}
@@ -96,8 +112,12 @@ import { SavedLocation } from '../../core/models/weather.models';
           <span>Quick prefs</span>
         </div>
         <div class="d-flex flex-wrap gap-2">
-          <button class="btn btn-sm btn-outline-light" (click)="toggleTemp()">°C / °F</button>
-          <button class="btn btn-sm btn-outline-light" (click)="toggleTheme()">Theme</button>
+          <button class="btn-outline-accent btn-sm" type="button" (click)="toggleTemp()">
+            °C / °F
+          </button>
+          <button class="btn-outline-accent btn-sm" type="button" (click)="toggleTheme()">
+            Theme
+          </button>
         </div>
       </div>
     </aside>
@@ -109,7 +129,21 @@ import { SavedLocation } from '../../core/models/weather.models';
         left: 1rem;
         bottom: 1rem;
         z-index: 1040;
-        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        background: var(--accent);
+        color: var(--accent-contrast);
+        border: none;
+        padding: 11px 22px;
+        font-weight: 700;
+        border-radius: var(--radius-pill);
+        box-shadow: var(--shadow);
+        transition: transform 0.25s, background 0.25s;
+      }
+      .panel-trigger:hover {
+        background: var(--accent-hover);
+        color: var(--accent-contrast);
+        transform: translateY(-2px);
       }
       .panel {
         position: fixed;
@@ -118,6 +152,9 @@ import { SavedLocation } from '../../core/models/weather.models';
         width: 320px;
         height: 100vh;
         padding: 1.25rem;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        box-shadow: var(--shadow);
         transition: transform 0.35s ease, left 0.35s ease;
         overflow-y: auto;
         z-index: 1050;
@@ -128,14 +165,57 @@ import { SavedLocation } from '../../core/models/weather.models';
       .backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.35);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         z-index: 1045;
       }
       .mini-widget {
         padding: 1rem;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .saved-row {
+        padding: 0.5rem 0.75rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .btn-sm {
+        padding: 0.3rem 0.85rem;
+        font-size: 0.85rem;
+      }
+      .pill {
+        border: 1px solid var(--border);
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        transition: border-color 0.2s, color 0.2s;
+      }
+      .icon-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .panel-trigger:focus-visible,
+      .icon-btn:focus-visible,
+      .pill:focus-visible,
+      .btn-outline-accent:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       @media (max-width: 768px) {
         .panel {

@@ -4,195 +4,317 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { WeatherApiService } from '../../core/services/weather-api.service';
 import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
 import { ForecastDay } from '../../core/models/weather.models';
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RevealDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="row g-3">
-      <div class="col-12">
-        <div class="glass-card p-4">
-          <div class="section-title">
-            <i class="bi bi-clock-history"></i>
-            <span>Historical Weather Data</span>
-          </div>
-          <div class="text-muted small">
-            Location: <strong>{{ locationName() || 'Current Location' }}</strong> •
-            {{ locationCountry() || 'Unknown' }}
-          </div>
-          <div class="text-muted small mt-2">
-            <i class="bi bi-info-circle"></i> Select a date to view historical weather records
-          </div>
+    <div class="history-stack">
+      <!-- Date picker bar -->
+      <div class="card">
+        <h2 class="section-title">
+          <i class="bi bi-clock-history" aria-hidden="true"></i>
+          <span>Historical Weather Data</span>
+        </h2>
+        <div class="text-label">
+          Location: {{ locationName() || 'Current Location' }} &middot;
+          {{ locationCountry() || 'Unknown' }}
+        </div>
+        <div class="text-label mt-1">
+          <i class="bi bi-info-circle"></i> Select a date to view historical weather records
+        </div>
 
-          <div class="d-flex gap-2 align-items-center mt-4 flex-wrap">
-            <label class="form-label mb-0 fw-bold">Select Date:</label>
-            <input
-              class="form-control form-control-sm"
-              style="width: clamp(160px, 50vw, 240px);"
-              type="date"
-              [formControl]="date"
-            />
-            <button class="btn btn-sm btn-primary" (click)="load()">
-              <i class="bi bi-search"></i> Load
-            </button>
-            <div class="vr"></div>
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              (click)="loadToday()"
-              title="Load today's historical data"
-            >
-              <i class="bi bi-calendar-today"></i> Today
-            </button>
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              (click)="loadYesterday()"
-              title="Load yesterday's historical data"
-            >
-              <i class="bi bi-calendar-check"></i> Yesterday
-            </button>
-            <button
-              class="btn btn-sm btn-outline-secondary"
-              (click)="loadLast7Days()"
-              title="Load average for last 7 days"
-            >
-              <i class="bi bi-calendar-range"></i> Last 7 Days
-            </button>
-          </div>
+        <div class="picker-bar">
+          <label class="text-label picker-label" for="history-date">Select Date</label>
+          <input id="history-date" class="date-input" type="date" [formControl]="date" />
+          <button type="button" class="btn-accent" (click)="load()">
+            <i class="bi bi-search"></i> Load
+          </button>
+          <span class="picker-divider" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="btn-outline-accent btn-sm"
+            (click)="loadToday()"
+            title="Load today's historical data"
+          >
+            <i class="bi bi-calendar-today"></i> Today
+          </button>
+          <button
+            type="button"
+            class="btn-outline-accent btn-sm"
+            (click)="loadYesterday()"
+            title="Load yesterday's historical data"
+          >
+            <i class="bi bi-calendar-check"></i> Yesterday
+          </button>
+          <button
+            type="button"
+            class="btn-outline-accent btn-sm"
+            (click)="loadLast7Days()"
+            title="Load average for last 7 days"
+          >
+            <i class="bi bi-calendar-range"></i> Last 7 Days
+          </button>
         </div>
       </div>
 
-      <div class="col-12" *ngIf="day">
-        <div class="row g-3">
-          <div class="col-12 col-lg-6">
-            <div class="glass-card p-4">
-              <div class="fw-bold mb-3">Temperature</div>
-              <div class="row g-2">
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-danger bg-opacity-10 text-center">
-                    <div class="text-muted small">High</div>
-                    <div class="fs-5 fw-bold text-danger">{{ day.maxtempC }}°C</div>
-                    <small class="text-muted"
-                      >{{ day.maxtempC * 1.8 + 32 | number : '1.0-0' }}°F</small
-                    >
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-info bg-opacity-10 text-center">
-                    <div class="text-muted small">Low</div>
-                    <div class="fs-5 fw-bold text-info">{{ day.mintempC }}°C</div>
-                    <small class="text-muted"
-                      >{{ day.mintempC * 1.8 + 32 | number : '1.0-0' }}°F</small
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="mt-3 p-3 rounded-3 bg-dark-subtle">
-                <div class="text-muted small">Average</div>
-                <div class="fw-bold">{{ day.avgtempC | number : '1.1-1' }}°C</div>
-              </div>
+      <!-- Content: stat bento -->
+      <div class="stat-bento" *ngIf="day">
+        <div class="card" appReveal [appReveal]="0">
+          <div class="section-title sm">Temperature</div>
+          <div class="tile-row">
+            <div class="tile tint-danger">
+              <div class="text-label">High</div>
+              <div class="tile-value">{{ day.maxtempC }}°C</div>
+              <div class="text-label">{{ day.maxtempC * 1.8 + 32 | number : '1.0-0' }}°F</div>
+            </div>
+            <div class="tile tint-accent">
+              <div class="text-label">Low</div>
+              <div class="tile-value">{{ day.mintempC }}°C</div>
+              <div class="text-label">{{ day.mintempC * 1.8 + 32 | number : '1.0-0' }}°F</div>
             </div>
           </div>
+          <div class="tile tint-neutral">
+            <div class="text-label">Average</div>
+            <div class="tile-value">{{ day.avgtempC | number : '1.1-1' }}°C</div>
+          </div>
+        </div>
 
-          <div class="col-12 col-lg-6">
-            <div class="glass-card p-4">
-              <div class="fw-bold mb-3">Precipitation & Wind</div>
-              <div class="row g-2">
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-success bg-opacity-10 text-center">
-                    <div class="text-muted small">Rain Chance</div>
-                    <div class="fs-5 fw-bold text-success">{{ day.dailyChanceOfRain }}%</div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-center">
-                    <div class="text-muted small">Precipitation</div>
-                    <div class="fs-5 fw-bold text-warning">
-                      {{ day.totalprecipMm | number : '1.1-1' }} mm
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="mt-3 p-3 rounded-3 bg-dark-subtle">
-                <div class="text-muted small">Max Wind</div>
-                <div class="fw-bold">{{ day.maxwindKph | number : '1.1-1' }} kph</div>
-              </div>
+        <div class="card" appReveal [appReveal]="1">
+          <div class="section-title sm">Precipitation &amp; Wind</div>
+          <div class="tile-row">
+            <div class="tile tint-success">
+              <div class="text-label">Rain Chance</div>
+              <div class="tile-value">{{ day.dailyChanceOfRain }}%</div>
+            </div>
+            <div class="tile tint-warning">
+              <div class="text-label">Precipitation</div>
+              <div class="tile-value">{{ day.totalprecipMm | number : '1.1-1' }} mm</div>
             </div>
           </div>
+          <div class="tile tint-neutral">
+            <div class="text-label">Max Wind</div>
+            <div class="tile-value">{{ day.maxwindKph | number : '1.1-1' }} kph</div>
+          </div>
+        </div>
 
-          <div class="col-12 col-lg-6">
-            <div class="glass-card p-4">
-              <div class="fw-bold mb-3">Humidity & UV</div>
-              <div class="row g-2">
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-info bg-opacity-10 text-center">
-                    <div class="text-muted small">Humidity</div>
-                    <div class="fs-5 fw-bold text-info">
-                      {{ day.avghumidity | number : '1.0-0' }}%
-                    </div>
-                  </div>
-                </div>
-                <div class="col-6">
-                  <div class="p-3 rounded-3 bg-warning bg-opacity-10 text-center">
-                    <div class="text-muted small">UV Index</div>
-                    <div class="fs-5 fw-bold text-warning">{{ day.uv | number : '1.1-1' }}</div>
-                  </div>
-                </div>
-              </div>
+        <div class="card" appReveal [appReveal]="2">
+          <div class="section-title sm">Humidity &amp; UV</div>
+          <div class="tile-row">
+            <div class="tile tint-accent">
+              <div class="text-label">Humidity</div>
+              <div class="tile-value">{{ day.avghumidity | number : '1.0-0' }}%</div>
+            </div>
+            <div class="tile tint-warning">
+              <div class="text-label">UV Index</div>
+              <div class="tile-value">{{ day.uv | number : '1.1-1' }}</div>
             </div>
           </div>
+        </div>
 
-          <div class="col-12 col-lg-6">
-            <div class="glass-card p-4">
-              <div class="fw-bold mb-3">Date Info</div>
-              <div class="p-3 rounded-3 bg-dark-subtle mb-2">
-                <div class="text-muted small">Date</div>
-                <div class="fw-bold">{{ day.date }}</div>
+        <div class="card" appReveal [appReveal]="3">
+          <div class="section-title sm">Date Info</div>
+          <div class="tile tint-neutral">
+            <div class="text-label">Date</div>
+            <div class="tile-value">{{ day.date }}</div>
+          </div>
+          <div *ngIf="day.sunrise" class="tile tint-neutral mt-2">
+            <div class="sun-row">
+              <div>
+                <div class="text-label">Sunrise</div>
+                <div class="tile-value">{{ day.sunrise }}</div>
               </div>
-              <div *ngIf="day.sunrise" class="p-3 rounded-3 bg-dark-subtle">
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <div class="text-muted small">Sunrise</div>
-                    <div class="fw-bold">{{ day.sunrise }}</div>
-                  </div>
-                  <div>
-                    <div class="text-muted small">Sunset</div>
-                    <div class="fw-bold">{{ day.sunset }}</div>
-                  </div>
-                </div>
+              <div>
+                <div class="text-label">Sunset</div>
+                <div class="tile-value">{{ day.sunset }}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="col-12" *ngIf="!day">
-        <div class="glass-card p-5 text-center">
-          <i class="bi bi-calendar2-blank text-muted" style="font-size: 3rem;"></i>
-          <div class="text-muted mt-3">
-            Select a date and click "Load" to view historical weather data
-          </div>
+      <!-- Empty state -->
+      <div class="card empty-card" *ngIf="!day">
+        <i class="bi bi-calendar2-blank"></i>
+        <div class="text-label">
+          Select a date and click "Load" to view historical weather data
         </div>
       </div>
 
-      <div class="col-12" *ngIf="isLoading">
-        <div class="glass-card p-4 text-center">
-          <div class="spinner-border spinner-border-sm text-info" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-          <div class="text-muted mt-2">Loading historical data...</div>
+      <!-- Loading skeleton -->
+      <div class="card" *ngIf="isLoading" aria-busy="true" aria-live="polite">
+        <div class="section-title sm">
+          <i class="bi bi-clock-history" aria-hidden="true"></i>
+          <span>Loading historical data…</span>
         </div>
+        <div class="tile-row" aria-hidden="true">
+          <div class="tile skeleton"></div>
+          <div class="tile skeleton"></div>
+        </div>
+        <div class="tile skeleton mt-2" aria-hidden="true"></div>
       </div>
 
-      <div class="col-12" *ngIf="error">
-        <div class="alert alert-warning mb-0">
-          <i class="bi bi-exclamation-triangle"></i> {{ error }}
-        </div>
+      <!-- Error state -->
+      <div class="card error-card" *ngIf="error" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span>{{ error }}</span>
       </div>
     </div>
   `,
+  styles: [
+    `
+      .history-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .section-title.sm {
+        font-size: 1rem;
+      }
+
+      .picker-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 1.25rem;
+      }
+
+      .picker-label {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .date-input {
+        width: clamp(160px, 50vw, 240px);
+        padding: 0.4rem 0.65rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 10px;
+        font: inherit;
+      }
+
+      .date-input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .picker-divider {
+        width: 1px;
+        align-self: stretch;
+        min-height: 1.75rem;
+        background: var(--border);
+        margin: 0 0.25rem;
+      }
+
+      .stat-bento {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+      }
+
+      .tile-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+      }
+
+      .tile {
+        padding: 0.85rem;
+        border-radius: 14px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        text-align: center;
+      }
+
+      .tile.mt-2 {
+        margin-top: 0.6rem;
+      }
+
+      .tile-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .tint-neutral {
+        background: var(--surface-2);
+      }
+
+      .tint-danger {
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+        border-color: color-mix(in srgb, var(--danger) 28%, var(--border));
+      }
+      .tint-danger .tile-value {
+        color: var(--danger);
+      }
+
+      .tint-accent {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+        border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+      }
+      .tint-accent .tile-value {
+        color: var(--accent);
+      }
+
+      .tint-success {
+        background: color-mix(in srgb, var(--success) 12%, transparent);
+        border-color: color-mix(in srgb, var(--success) 28%, var(--border));
+      }
+      .tint-success .tile-value {
+        color: var(--success);
+      }
+
+      .tint-warning {
+        background: color-mix(in srgb, var(--warning) 12%, transparent);
+        border-color: color-mix(in srgb, var(--warning) 28%, var(--border));
+      }
+      .tint-warning .tile-value {
+        color: var(--warning);
+      }
+
+      .sun-row {
+        display: flex;
+        justify-content: space-between;
+        text-align: left;
+        gap: 1rem;
+      }
+
+      .tile.skeleton {
+        min-height: 80px;
+        border: none;
+      }
+
+      .empty-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+      }
+
+      .empty-card i {
+        font-size: 2.75rem;
+        color: var(--accent);
+      }
+
+      .error-card {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+        background: color-mix(in srgb, var(--danger) 8%, transparent);
+        color: var(--danger);
+      }
+    `,
+  ],
 })
 export class HistoryComponent {
   private readonly api = inject(WeatherApiService);

@@ -5,16 +5,17 @@ import { LocationService } from '../../core/services/location.service';
 import { NgChartsModule } from 'ng2-charts';
 import type { ChartConfiguration } from 'chart.js';
 import type { ForecastHour, SavedLocation } from '../../core/models/weather.models';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
+import { TiltDirective } from '../../shared/directives/tilt.directive';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgChartsModule],
+  imports: [CommonModule, NgChartsModule, RevealDirective, TiltDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="row g-3">
-      <div class="col-12 col-lg-4" *ngIf="current() as current">
-        <div class="glass-card p-3 h-100">
+    <div class="bento">
+      <div class="card bento-hero" appTilt [appReveal]="0" *ngIf="current() as current">
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <div class="text-label">Current</div>
@@ -47,80 +48,82 @@ import type { ForecastHour, SavedLocation } from '../../core/models/weather.mode
               <div class="fw-semibold">{{ current.uv }}</div>
             </div>
           </div>
-        </div>
       </div>
 
-      <div class="col-12 col-lg-8">
-        <div class="glass-card p-3 h-100">
+      <div class="card bento-chart" [appReveal]="1">
           <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-            <div class="section-title mb-0">
-              <i class="bi bi-graph-up"></i>
+            <h2 class="section-title mb-0">
+              <i class="bi bi-graph-up" aria-hidden="true"></i>
               <span>Next hours - {{ currentLocationName() }}</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <div class="btn-group btn-group-sm" role="group">
+            </h2>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <div class="metric-toggle" role="group">
                 <button
-                  class="btn btn-outline-info"
+                  class="btn-outline-accent btn-sm"
                   [class.active]="selectedMetric === 'tempC'"
                   (click)="selectMetric('tempC')"
                 >
                   Temp
                 </button>
                 <button
-                  class="btn btn-outline-info"
+                  class="btn-outline-accent btn-sm"
                   [class.active]="selectedMetric === 'humidity'"
                   (click)="selectMetric('humidity')"
                 >
                   Humidity
                 </button>
                 <button
-                  class="btn btn-outline-info"
+                  class="btn-outline-accent btn-sm"
                   [class.active]="selectedMetric === 'windKph'"
                   (click)="selectMetric('windKph')"
                 >
                   Wind
                 </button>
                 <button
-                  class="btn btn-outline-info"
+                  class="btn-outline-accent btn-sm"
                   [class.active]="selectedMetric === 'precipMm'"
                   (click)="selectMetric('precipMm')"
                 >
                   Precip
                 </button>
               </div>
-              <div class="input-group input-group-sm" style="width: clamp(200px, 45vw, 320px);">
-                <span class="input-group-text bg-dark border-secondary text-muted">Country</span>
+              <div class="country-group" style="width: clamp(200px, 45vw, 320px);">
+                <span class="country-label">Country</span>
                 <input
-                  class="form-control bg-dark text-white border-secondary"
+                  class="country-input"
                   type="text"
                   [value]="countryQuery"
                   (input)="countryQuery = ($any($event.target).value || '').trim()"
                   placeholder="e.g. France"
                 />
-                <button class="btn btn-info" (click)="applyCountry()">Go</button>
+                <button class="btn-accent btn-sm" (click)="applyCountry()">Go</button>
               </div>
             </div>
           </div>
           <div *ngIf="forecast()?.days?.[0]?.hours?.length; else noData">
             <canvas
               baseChart
+              role="img"
+              [attr.aria-label]="
+                'Line chart of ' + chartMetricLabel() + ' over the next hours'
+              "
               [data]="seriesChartData"
               [options]="chartOptions"
               [type]="'line'"
               height="300"
             ></canvas>
-            <div class="d-flex justify-content-around mt-3 pt-2 border-top border-secondary">
+            <div class="d-flex justify-content-around mt-3 pt-2 stat-divider">
               <div class="text-center">
                 <div class="text-muted small">Avg</div>
-                <div class="fw-bold text-success">{{ avgMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-success">{{ avgMetric() }}{{ unitLabel }}</div>
               </div>
               <div class="text-center">
                 <div class="text-muted small">High</div>
-                <div class="fw-bold text-danger">{{ highMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-danger">{{ highMetric() }}{{ unitLabel }}</div>
               </div>
               <div class="text-center">
                 <div class="text-muted small">Low</div>
-                <div class="fw-bold text-info">{{ lowMetric() }}{{ unitLabel }}</div>
+                <div class="fw-bold stat-accent">{{ lowMetric() }}{{ unitLabel }}</div>
               </div>
             </div>
           </div>
@@ -130,18 +133,16 @@ import type { ForecastHour, SavedLocation } from '../../core/models/weather.mode
               <div class="mt-2">Loading weather data...</div>
             </div>
           </ng-template>
-        </div>
       </div>
 
-      <div class="col-12 col-xl-8">
-        <div class="glass-card p-3">
-          <div class="section-title">
-            <i class="bi bi-calendar-week"></i>
+      <div class="card bento-forecast" [appReveal]="2">
+          <h2 class="section-title">
+            <i class="bi bi-calendar-week" aria-hidden="true"></i>
             <span>Daily forecast - {{ forecastLocationName() }}</span>
-          </div>
+          </h2>
           <div class="d-flex flex-nowrap overflow-auto gap-3 pb-2">
             <div
-              class="forecast-card p-3 rounded-4 bg-dark-subtle text-center"
+              class="forecast-card text-center"
               *ngFor="let day of forecast()?.days; trackBy: trackByDate"
             >
               <div class="fw-semibold">{{ day.date }}</div>
@@ -149,24 +150,23 @@ import type { ForecastHour, SavedLocation } from '../../core/models/weather.mode
                 [src]="day.condition.icon"
                 width="48"
                 height="48"
+                loading="lazy"
                 [alt]="day.condition.text || 'Weather icon'"
               />
               <div class="fw-bold">{{ day.maxtempC }}° / {{ day.mintempC }}°</div>
               <small class="text-muted">{{ day.condition.text }}</small>
             </div>
           </div>
-        </div>
       </div>
 
-      <div class="col-12 col-xl-4">
-        <div class="glass-card p-3 h-100">
-          <div class="section-title">
-            <i class="bi bi-exclamation-triangle"></i>
+      <div class="card bento-alerts" [appReveal]="3">
+          <h2 class="section-title">
+            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
             <span>Alerts - {{ forecastLocationName() }}</span>
-          </div>
+          </h2>
           <div *ngIf="forecast()?.alerts?.length; else noAlerts" class="d-flex flex-column gap-2">
             <div
-              class="p-2 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25"
+              class="p-2 rounded-3 alert-chip"
               *ngFor="let alert of forecast()?.alerts"
             >
               <div class="fw-semibold">{{ alert.headline }}</div>
@@ -176,14 +176,13 @@ import type { ForecastHour, SavedLocation } from '../../core/models/weather.mode
           <ng-template #noAlerts>
             <div class="text-muted">No active weather alerts.</div>
           </ng-template>
-        </div>
       </div>
-      <div class="col-12 col-xl-4">
-        <div class="glass-card p-3 h-100">
-          <div class="section-title">
-            <i class="bi bi-bookmarks"></i>
+
+      <div class="card bento-saved" [appReveal]="4">
+          <h2 class="section-title">
+            <i class="bi bi-bookmarks" aria-hidden="true"></i>
             <span>Saved & History</span>
-          </div>
+          </h2>
           <div class="mb-3">
             <div class="fw-semibold">Saved</div>
             <div
@@ -215,14 +214,114 @@ import type { ForecastHour, SavedLocation } from '../../core/models/weather.mode
             </div>
             <div *ngIf="!locations.history().length" class="text-muted small">No history yet</div>
           </div>
-        </div>
       </div>
     </div>
   `,
   styles: [
     `
+      .bento {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+      .card {
+        padding: 1.25rem;
+      }
+      .bento-hero {
+        grid-column: span 4;
+      }
+      .bento-chart {
+        grid-column: span 8;
+      }
+      .bento-forecast {
+        grid-column: span 8;
+      }
+      .bento-alerts {
+        grid-column: span 4;
+      }
+      .bento-saved {
+        grid-column: span 4;
+      }
       .forecast-card {
         min-width: 140px;
+        padding: 0.85rem;
+        border-radius: 1rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+      }
+      .alert-chip {
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+        border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+      }
+      .stat-divider {
+        border-top: 1px solid var(--border);
+      }
+      .stat-success {
+        color: var(--success);
+      }
+      .stat-danger {
+        color: var(--danger);
+      }
+      .stat-accent {
+        color: var(--accent);
+      }
+      .metric-toggle {
+        display: inline-flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+      }
+      .btn-sm {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+      }
+      .metric-toggle .btn-outline-accent.active {
+        background: var(--accent);
+        color: var(--accent-contrast);
+        border-color: var(--accent);
+      }
+      .country-group {
+        display: inline-flex;
+        align-items: stretch;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-pill, 999px);
+        overflow: hidden;
+        background: var(--surface-2);
+      }
+      .country-label {
+        display: inline-flex;
+        align-items: center;
+        padding: 0 0.7rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: var(--surface);
+        white-space: nowrap;
+      }
+      .country-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        background: var(--surface-2);
+        border: none;
+        color: var(--text);
+        padding: 0.35rem 0.7rem;
+        font-size: 0.85rem;
+        outline: none;
+      }
+      .country-group .btn-accent {
+        border-radius: 0;
+      }
+      @media (max-width: 991px) {
+        .bento {
+          grid-template-columns: 1fr;
+        }
+        .bento-hero,
+        .bento-chart,
+        .bento-forecast,
+        .bento-alerts,
+        .bento-saved {
+          grid-column: 1 / -1;
+        }
       }
     `,
   ],
@@ -245,6 +344,19 @@ export class DashboardComponent implements OnInit {
     return this.forecast()?.location?.name || 'Forecast Location';
   });
 
+  chartMetricLabel(): string {
+    switch (this.selectedMetric) {
+      case 'tempC':
+        return 'temperature';
+      case 'humidity':
+        return 'humidity';
+      case 'windKph':
+        return 'wind speed';
+      default:
+        return 'precipitation';
+    }
+  }
+
   readonly chartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,
@@ -253,23 +365,28 @@ export class DashboardComponent implements OnInit {
       tooltip: {
         backgroundColor: 'rgba(0,0,0,0.8)',
         padding: 12,
-        titleColor: '#00d9ff',
-        bodyColor: '#76ff00',
-        borderColor: '#b366ff',
+        titleColor: this.cssVar('--accent', '#38bdf8'),
+        bodyColor: this.cssVar('--text', '#e8eef6'),
+        borderColor: this.cssVar('--accent', '#38bdf8'),
         borderWidth: 1,
       },
     },
     scales: {
       x: {
-        ticks: { color: '#00d9ff', font: { size: 11, weight: 'bold' } },
-        grid: { color: 'rgba(0,217,255,0.1)' },
+        ticks: { color: this.cssVar('--text-muted', '#9fb3c8'), font: { size: 11, weight: 'bold' } },
+        grid: { color: 'rgba(159,179,200,0.12)' },
       },
       y: {
-        ticks: { color: '#76ff00', font: { size: 11, weight: 'bold' } },
-        grid: { color: 'rgba(118,255,0,0.1)' },
+        ticks: { color: this.cssVar('--text-muted', '#9fb3c8'), font: { size: 11, weight: 'bold' } },
+        grid: { color: 'rgba(159,179,200,0.12)' },
       },
     },
   };
+
+  private cssVar(name: string, fallback: string): string {
+    if (typeof getComputedStyle === 'undefined' || typeof document === 'undefined') return fallback;
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  }
 
   readonly avgMetric = computed(() => {
     const hours = (this.forecast()?.days?.[0]?.hours ?? []) as ForecastHour[];
@@ -317,9 +434,9 @@ export class DashboardComponent implements OnInit {
           data: hours.map((h: ForecastHour) => this.valueByMetric(h)),
           tension: 0.4,
           fill: true,
-          borderColor: '#00d9ff',
-          backgroundColor: 'rgba(0,217,255,0.2)',
-          pointBackgroundColor: '#ff006e',
+          borderColor: this.cssVar('--accent', '#38bdf8'),
+          backgroundColor: 'rgba(56,189,248,0.12)',
+          pointBackgroundColor: this.cssVar('--accent', '#38bdf8'),
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 5,
