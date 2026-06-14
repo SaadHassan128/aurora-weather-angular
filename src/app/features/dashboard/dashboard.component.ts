@@ -16,36 +16,46 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
   template: `
     <div class="bento">
       <div class="card bento-hero" appTilt [appReveal]="0" *ngIf="current() as current">
-          <div class="d-flex justify-content-between align-items-start">
+          <div class="hero-glow" aria-hidden="true"></div>
+          <div class="hero-top">
             <div>
-              <div class="text-label">Current</div>
-              <h2 class="mb-0">{{ current.tempC }}°C</h2>
-              <div class="text-label">{{ current.condition.text }}</div>
+              <div class="text-label">Now · {{ currentLocationName() }}</div>
+              <div class="hero-temp">
+                {{ current.tempC | number : '1.0-0' }}<span class="deg">°C</span>
+              </div>
+              <div class="hero-cond">{{ current.condition.text }}</div>
+              <div class="hero-feels text-muted">Feels like {{ current.feelslikeC | number : '1.0-0' }}°</div>
             </div>
-            <img
-              *ngIf="current.condition.icon"
-              [src]="current.condition.icon"
-              width="72"
-              height="72"
-              [alt]="current.condition.text || 'Weather icon'"
-            />
+            <i class="bi {{ glyph(current.condition.text, current.isDay) }} hero-icon" aria-hidden="true"></i>
           </div>
-          <div class="mt-3 row text-center">
-            <div class="col">
-              <div class="text-label">Feels</div>
-              <div class="fw-semibold">{{ current.feelslikeC }}°</div>
+          <div class="hero-metrics">
+            <div class="metric-chip">
+              <i class="bi bi-wind" aria-hidden="true"></i>
+              <div>
+                <div class="metric-chip-label">Wind</div>
+                <div class="metric-chip-value">{{ current.windKph | number : '1.0-0' }} kph</div>
+              </div>
             </div>
-            <div class="col">
-              <div class="text-label">Wind</div>
-              <div class="fw-semibold">{{ current.windKph }} kph</div>
+            <div class="metric-chip">
+              <i class="bi bi-droplet-half" aria-hidden="true"></i>
+              <div>
+                <div class="metric-chip-label">Humidity</div>
+                <div class="metric-chip-value">{{ current.humidity }}%</div>
+              </div>
             </div>
-            <div class="col">
-              <div class="text-label">Humidity</div>
-              <div class="fw-semibold">{{ current.humidity }}%</div>
+            <div class="metric-chip">
+              <i class="bi bi-brightness-high" aria-hidden="true"></i>
+              <div>
+                <div class="metric-chip-label">UV index</div>
+                <div class="metric-chip-value">{{ current.uv }}</div>
+              </div>
             </div>
-            <div class="col">
-              <div class="text-label">UV</div>
-              <div class="fw-semibold">{{ current.uv }}</div>
+            <div class="metric-chip">
+              <i class="bi bi-eye" aria-hidden="true"></i>
+              <div>
+                <div class="metric-chip-label">Visibility</div>
+                <div class="metric-chip-value">{{ current.visKm | number : '1.0-0' }} km</div>
+              </div>
             </div>
           </div>
       </div>
@@ -101,17 +111,18 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
             </div>
           </div>
           <div *ngIf="forecast()?.days?.[0]?.hours?.length; else noData">
-            <canvas
-              baseChart
-              role="img"
-              [attr.aria-label]="
-                'Line chart of ' + chartMetricLabel() + ' over the next hours'
-              "
-              [data]="seriesChartData"
-              [options]="chartOptions"
-              [type]="'line'"
-              height="300"
-            ></canvas>
+            <div class="chart-shell">
+              <canvas
+                baseChart
+                role="img"
+                [attr.aria-label]="
+                  'Line chart of ' + chartMetricLabel() + ' over the next hours'
+                "
+                [data]="seriesChartData"
+                [options]="chartOptions"
+                [type]="'line'"
+              ></canvas>
+            </div>
             <div class="d-flex justify-content-around mt-3 pt-2 stat-divider">
               <div class="text-center">
                 <div class="text-muted small">Avg</div>
@@ -140,21 +151,18 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
             <i class="bi bi-calendar-week" aria-hidden="true"></i>
             <span>Daily forecast - {{ forecastLocationName() }}</span>
           </h2>
-          <div class="d-flex flex-nowrap overflow-auto gap-3 pb-2">
+          <div class="forecast-strip">
             <div
-              class="forecast-card text-center"
+              class="forecast-card"
               *ngFor="let day of forecast()?.days; trackBy: trackByDate"
             >
-              <div class="fw-semibold">{{ day.date }}</div>
-              <img
-                [src]="day.condition.icon"
-                width="48"
-                height="48"
-                loading="lazy"
-                [alt]="day.condition.text || 'Weather icon'"
-              />
-              <div class="fw-bold">{{ day.maxtempC }}° / {{ day.mintempC }}°</div>
-              <small class="text-muted">{{ day.condition.text }}</small>
+              <div class="forecast-day">{{ day.date | date : 'EEE' }}</div>
+              <div class="forecast-date text-muted">{{ day.date | date : 'MMM d' }}</div>
+              <i class="bi {{ glyph(day.condition.text, true) }} forecast-glyph" aria-hidden="true"></i>
+              <div class="forecast-temps">
+                <span class="hi">{{ day.maxtempC | number : '1.0-0' }}°</span>
+                <span class="lo text-muted">{{ day.mintempC | number : '1.0-0' }}°</span>
+              </div>
             </div>
           </div>
       </div>
@@ -222,17 +230,18 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       .bento {
         display: grid;
         grid-template-columns: repeat(12, 1fr);
-        gap: 1rem;
+        gap: 1.1rem;
         align-items: start;
       }
       .card {
-        padding: 1.25rem;
+        padding: 1.35rem;
       }
       .bento-hero {
-        grid-column: span 4;
+        grid-column: span 5;
+        overflow: hidden;
       }
       .bento-chart {
-        grid-column: span 8;
+        grid-column: span 7;
       }
       .bento-forecast {
         grid-column: span 8;
@@ -241,14 +250,140 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
         grid-column: span 4;
       }
       .bento-saved {
-        grid-column: span 4;
+        grid-column: span 12;
+      }
+
+      /* ---- Hero ---- */
+      .bento-hero {
+        position: relative;
+      }
+      .hero-glow {
+        position: absolute;
+        inset: -40% 30% auto -20%;
+        height: 70%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          color-mix(in srgb, var(--accent) 32%, transparent),
+          transparent 70%
+        );
+        filter: blur(10px);
+        pointer-events: none;
+      }
+      .hero-top {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: start;
+        gap: 1rem;
+      }
+      .hero-temp {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        font-size: clamp(3.4rem, 6vw, 4.6rem);
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        margin-top: 0.2rem;
+      }
+      .hero-temp .deg {
+        font-size: 0.42em;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-left: 0.1em;
+      }
+      .hero-cond {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin-top: 0.15rem;
+      }
+      .hero-feels {
+        font-size: 0.85rem;
+        margin-top: 0.1rem;
+      }
+      .hero-icon {
+        font-size: 3.6rem;
+        color: var(--accent);
+        line-height: 1;
+        margin-top: 0.3rem;
+        filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--accent) 40%, transparent));
+      }
+      .hero-metrics {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+        margin-top: 1.4rem;
+      }
+      .metric-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.65rem 0.8rem;
+        border-radius: 0.85rem;
+        background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+        border: 1px solid var(--border);
+      }
+      .metric-chip i {
+        font-size: 1.1rem;
+        color: var(--accent);
+      }
+      .metric-chip-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+      }
+      .metric-chip-value {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      /* ---- Chart ---- */
+      .chart-shell {
+        height: 240px;
+      }
+
+      /* ---- Forecast strip ---- */
+      .forecast-strip {
+        display: flex;
+        gap: 0.7rem;
+        overflow-x: auto;
+        padding-bottom: 0.4rem;
       }
       .forecast-card {
-        min-width: 140px;
-        padding: 0.85rem;
+        flex: 0 0 auto;
+        min-width: 92px;
+        padding: 0.9rem 0.6rem;
         border-radius: 1rem;
-        background: var(--surface-2);
+        background: color-mix(in srgb, var(--surface-2) 70%, transparent);
         border: 1px solid var(--border);
+        text-align: center;
+        transition: transform 0.25s ease, border-color 0.25s ease;
+      }
+      .forecast-card:hover {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+      }
+      .forecast-day {
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .forecast-date {
+        font-size: 0.72rem;
+      }
+      .forecast-glyph {
+        font-size: 1.7rem;
+        color: var(--accent);
+        margin: 0.5rem 0;
+        display: block;
+      }
+      .forecast-temps {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+      }
+      .forecast-temps .hi {
+        font-weight: 700;
       }
       .alert-chip {
         background: color-mix(in srgb, var(--danger) 12%, transparent);
@@ -323,6 +458,11 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           grid-column: 1 / -1;
         }
       }
+      @media (max-width: 420px) {
+        .hero-metrics {
+          grid-template-columns: 1fr;
+        }
+      }
     `,
   ],
 })
@@ -344,6 +484,18 @@ export class DashboardComponent implements OnInit {
     return this.forecast()?.location?.name || 'Forecast Location';
   });
 
+  /** Map a condition string to a Bootstrap-icon glyph (robust fallback when CDN icons are missing). */
+  glyph(condition: string | undefined | null, isDay: boolean): string {
+    const c = (condition ?? '').toLowerCase();
+    if (/thunder|storm/.test(c)) return 'bi-cloud-lightning-rain';
+    if (/snow|sleet|ice|blizzard/.test(c)) return 'bi-cloud-snow';
+    if (/rain|drizzle|shower/.test(c)) return 'bi-cloud-rain-heavy';
+    if (/fog|mist|haze/.test(c)) return 'bi-cloud-fog2';
+    if (/cloud|overcast/.test(c)) return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+    if (/clear|sun/.test(c)) return isDay ? 'bi-sun' : 'bi-moon-stars';
+    return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+  }
+
   chartMetricLabel(): string {
     switch (this.selectedMetric) {
       case 'tempC':
@@ -359,7 +511,7 @@ export class DashboardComponent implements OnInit {
 
   readonly chartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {

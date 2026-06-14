@@ -73,15 +73,9 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
             </div>
             <div class="hour-strip">
               <div class="hour-tile" *ngFor="let hour of hours">
-                <div class="hour-time">{{ hour.time }}</div>
-                <img
-                  [src]="hour.condition.icon"
-                  width="42"
-                  height="42"
-                  loading="lazy"
-                  [alt]="hour.condition.text || 'Weather icon'"
-                />
-                <div class="hour-temp">{{ hour.tempC }}°</div>
+                <div class="hour-time">{{ hour.time | date : 'HH:mm' }}</div>
+                <i class="bi {{ glyph(hour.condition.text) }} hour-glyph" aria-hidden="true"></i>
+                <div class="hour-temp">{{ hour.tempC | number : '1.0-0' }}°</div>
                 <div class="text-label">Rain {{ hour.chanceOfRain }}%</div>
               </div>
             </div>
@@ -102,20 +96,14 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
               >
                 <div class="day-head">
                   <div>
-                    <div class="day-date">{{ day.date }}</div>
+                    <div class="day-date">{{ day.date | date : 'EEE, MMM d' }}</div>
                     <div class="text-label">{{ day.condition.text }}</div>
                   </div>
-                  <img
-                    [src]="day.condition.icon"
-                    width="42"
-                    height="42"
-                    loading="lazy"
-                    [alt]="day.condition.text || 'Weather icon'"
-                  />
+                  <i class="bi {{ glyph(day.condition.text) }} day-glyph" aria-hidden="true"></i>
                 </div>
                 <div class="day-temps">
-                  <div><span class="text-label">High</span> {{ day.maxtempC }}°</div>
-                  <div><span class="text-label">Low</span> {{ day.mintempC }}°</div>
+                  <div><span class="text-label">High</span> {{ day.maxtempC | number : '1.0-0' }}°</div>
+                  <div><span class="text-label">Low</span> {{ day.mintempC | number : '1.0-0' }}°</div>
                 </div>
                 <div class="day-meta">
                   <span class="text-label">Rain</span> {{ day.dailyChanceOfRain }}%
@@ -173,6 +161,19 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       .hour-time {
         font-weight: 600;
         color: var(--text);
+      }
+
+      .hour-glyph {
+        display: block;
+        font-size: 1.6rem;
+        color: var(--accent);
+        margin: 0.45rem 0;
+      }
+
+      .day-glyph {
+        font-size: 1.9rem;
+        color: var(--accent);
+        line-height: 1;
       }
 
       .hour-temp {
@@ -262,6 +263,18 @@ export class ForecastComponent {
   get hours() {
     const day0 = this.forecast()?.days?.[0];
     return day0?.hours ?? [];
+  }
+
+  /** Condition string -> Bootstrap-icon glyph (robust fallback for missing CDN icons). */
+  glyph(condition: string | undefined | null, isDay = true): string {
+    const c = (condition ?? '').toLowerCase();
+    if (/thunder|storm/.test(c)) return 'bi-cloud-lightning-rain';
+    if (/snow|sleet|ice|blizzard/.test(c)) return 'bi-cloud-snow';
+    if (/rain|drizzle|shower/.test(c)) return 'bi-cloud-rain-heavy';
+    if (/fog|mist|haze/.test(c)) return 'bi-cloud-fog2';
+    if (/cloud|overcast/.test(c)) return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+    if (/clear|sun/.test(c)) return isDay ? 'bi-sun' : 'bi-moon-stars';
+    return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
   }
 
   reload(): void {
