@@ -90,6 +90,7 @@ body {
   background: var(--bg-glow), var(--bg-grad);
   background-attachment: fixed;
   transition: var(--mood-ease);
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -157,10 +158,16 @@ a:hover { color: var(--accent-hover); }
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
   font-family: var(--font-heading);
   font-weight: 700;
   margin-bottom: 0.75rem;
   color: var(--text);
+}
+.section-title > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .section-title i { color: var(--accent); }
 
