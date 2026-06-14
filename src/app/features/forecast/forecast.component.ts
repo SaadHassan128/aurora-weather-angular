@@ -4,6 +4,7 @@ import { WeatherStateService } from '../../core/services/weather-state.service';
 import { LocationService } from '../../core/services/location.service';
 import { RevealDirective } from '../../shared/directives/reveal.directive';
 import { TiltDirective } from '../../shared/directives/tilt.directive';
+import { ForecastDay } from '../../core/models/weather.models';
 
 @Component({
   selector: 'app-forecast',
@@ -73,15 +74,9 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
             </div>
             <div class="hour-strip">
               <div class="hour-tile" *ngFor="let hour of hours">
-                <div class="hour-time">{{ hour.time }}</div>
-                <img
-                  [src]="hour.condition.icon"
-                  width="42"
-                  height="42"
-                  loading="lazy"
-                  [alt]="hour.condition.text || 'Weather icon'"
-                />
-                <div class="hour-temp">{{ hour.tempC }}°</div>
+                <div class="hour-time">{{ hour.time | date : 'HH:mm' }}</div>
+                <i class="bi {{ glyph(hour.condition.text) }} hour-glyph" aria-hidden="true"></i>
+                <div class="hour-temp">{{ hour.tempC | number : '1.0-0' }}°</div>
                 <div class="text-label">Rain {{ hour.chanceOfRain }}%</div>
               </div>
             </div>
@@ -93,33 +88,35 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
               <i class="bi bi-calendar3"></i>
               <span>Next 7 days</span>
             </div>
-            <div class="day-grid">
+            <div class="day-list">
               <div
-                class="card day-card"
+                class="day-row"
                 appReveal
                 [appReveal]="i"
                 *ngFor="let day of forecast()?.days; let i = index"
               >
-                <div class="day-head">
-                  <div>
-                    <div class="day-date">{{ day.date }}</div>
-                    <div class="text-label">{{ day.condition.text }}</div>
+                <div class="day-when">
+                  <div class="day-dow">{{ i === 0 ? 'Today' : (day.date | date : 'EEE') }}</div>
+                  <div class="day-date text-muted">{{ day.date | date : 'MMM d' }}</div>
+                </div>
+                <i class="bi {{ glyph(day.condition.text) }} day-glyph" aria-hidden="true"></i>
+                <div class="day-cond">
+                  <div class="day-cond-text">{{ day.condition.text }}</div>
+                  <div class="day-chips">
+                    <span class="day-chip"><i class="bi bi-droplet" aria-hidden="true"></i>{{ day.dailyChanceOfRain }}%</span>
+                    <span class="day-chip"><i class="bi bi-brightness-high" aria-hidden="true"></i>UV {{ day.uv }}</span>
                   </div>
-                  <img
-                    [src]="day.condition.icon"
-                    width="42"
-                    height="42"
-                    loading="lazy"
-                    [alt]="day.condition.text || 'Weather icon'"
-                  />
                 </div>
-                <div class="day-temps">
-                  <div><span class="text-label">High</span> {{ day.maxtempC }}°</div>
-                  <div><span class="text-label">Low</span> {{ day.mintempC }}°</div>
-                </div>
-                <div class="day-meta">
-                  <span class="text-label">Rain</span> {{ day.dailyChanceOfRain }}%
-                  &middot; <span class="text-label">UV</span> {{ day.uv }}
+                <div class="day-range">
+                  <span class="day-lo">{{ day.mintempC | number : '1.0-0' }}°</span>
+                  <span class="day-bar" aria-hidden="true">
+                    <span
+                      class="day-bar-fill"
+                      [style.left.%]="barLeft(day)"
+                      [style.width.%]="barWidth(day)"
+                    ></span>
+                  </span>
+                  <span class="day-hi">{{ day.maxtempC | number : '1.0-0' }}°</span>
                 </div>
               </div>
             </div>
@@ -145,6 +142,14 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
 
       .header-card .text-label {
         margin-top: 0.25rem;
+      }
+      .header-card .section-title {
+        font-size: clamp(1.25rem, 5vw, 1.6rem);
+        margin-bottom: 0;
+      }
+      .header-card .section-title > span {
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .hour-strip {
@@ -175,50 +180,143 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
         color: var(--text);
       }
 
+      .hour-glyph {
+        display: block;
+        font-size: 1.6rem;
+        color: var(--accent);
+        margin: 0.45rem 0;
+      }
+
+      .day-glyph {
+        font-size: 1.9rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+
       .hour-temp {
         font-weight: 700;
         font-size: 1.1rem;
         color: var(--text);
       }
 
-      .day-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 0.85rem;
-      }
-
-      .day-card {
-        height: 100%;
-      }
-
-      .day-skeleton {
-        min-height: 150px;
-        border-radius: 14px;
-      }
-
-      .day-head {
+      .day-list {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
+        flex-direction: column;
       }
 
+      .day-row {
+        display: grid;
+        grid-template-columns: 4.5rem 2rem 1fr minmax(140px, 16rem);
+        align-items: center;
+        gap: 1rem;
+        padding: 0.85rem 0.25rem;
+        border-bottom: 1px solid var(--border);
+        max-width: 100%;
+      }
+      .day-row:last-child {
+        border-bottom: none;
+      }
+
+      .day-dow {
+        font-weight: 700;
+        color: var(--text);
+      }
       .day-date {
+        font-size: 0.78rem;
+      }
+      .day-glyph {
+        font-size: 1.5rem;
+        color: var(--accent);
+        text-align: center;
+      }
+      .day-cond {
+        min-width: 0;
+      }
+      .day-cond-text {
         font-weight: 600;
         color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-
-      .day-temps {
+      .day-chips {
         display: flex;
-        justify-content: space-between;
-        margin-top: 0.75rem;
-        color: var(--text);
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+      .day-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+      .day-chip i {
+        color: var(--accent);
+        font-size: 0.8rem;
       }
 
-      .day-meta {
-        margin-top: 0.5rem;
+      .day-range {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 0;
+      }
+      .day-lo {
         color: var(--text-muted);
-        font-size: 0.85rem;
+        font-weight: 600;
+        width: 2rem;
+        text-align: right;
+      }
+      .day-hi {
+        color: var(--text);
+        font-weight: 700;
+        width: 2rem;
+      }
+      .day-bar {
+        position: relative;
+        flex: 1 1 auto;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--surface-2);
+        overflow: hidden;
+      }
+      .day-bar-fill {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--accent) 55%, transparent),
+          var(--accent)
+        );
+      }
+
+      @media (max-width: 560px) {
+        .day-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.5rem 0.75rem;
+        }
+        .day-when {
+          width: 3.5rem;
+          flex: 0 0 auto;
+        }
+        .day-glyph {
+          flex: 0 0 auto;
+        }
+        .day-cond {
+          flex: 1 1 auto;
+        }
+        .day-range {
+          flex: 1 1 100%;
+          width: 100%;
+        }
+        .day-bar {
+          min-width: 0;
+        }
       }
 
       .empty-card {
@@ -262,6 +360,39 @@ export class ForecastComponent {
   get hours() {
     const day0 = this.forecast()?.days?.[0];
     return day0?.hours ?? [];
+  }
+
+  /** Overall temp bounds across the forecast, used to scale the range bars. */
+  readonly tempBounds = computed(() => {
+    const days = this.forecast()?.days ?? [];
+    if (!days.length) return { min: 0, max: 1 };
+    const min = Math.min(...days.map((d) => d.mintempC));
+    const max = Math.max(...days.map((d) => d.maxtempC));
+    return { min, max: max === min ? min + 1 : max };
+  });
+
+  /** Left offset (%) of a day's range bar within the overall span. */
+  barLeft(day: ForecastDay): number {
+    const { min, max } = this.tempBounds();
+    return ((day.mintempC - min) / (max - min)) * 100;
+  }
+
+  /** Width (%) of a day's range bar within the overall span. */
+  barWidth(day: ForecastDay): number {
+    const { min, max } = this.tempBounds();
+    return Math.max(((day.maxtempC - day.mintempC) / (max - min)) * 100, 6);
+  }
+
+  /** Condition string -> Bootstrap-icon glyph (robust fallback for missing CDN icons). */
+  glyph(condition: string | undefined | null, isDay = true): string {
+    const c = (condition ?? '').toLowerCase();
+    if (/thunder|storm/.test(c)) return 'bi-cloud-lightning-rain';
+    if (/snow|sleet|ice|blizzard/.test(c)) return 'bi-cloud-snow';
+    if (/rain|drizzle|shower/.test(c)) return 'bi-cloud-rain-heavy';
+    if (/fog|mist|haze/.test(c)) return 'bi-cloud-fog2';
+    if (/cloud|overcast/.test(c)) return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+    if (/clear|sun/.test(c)) return isDay ? 'bi-sun' : 'bi-moon-stars';
+    return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
   }
 
   reload(): void {

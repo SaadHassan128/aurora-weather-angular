@@ -17,6 +17,11 @@
   --success: #34d399;
   --warning: #fbbf24;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /* premium card depth */
+  --card-grad: linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0) 38%), var(--surface);
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+  --card-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 26px 56px -20px rgba(0, 0, 0, 0.6);
+  --ring: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme='light'] {
@@ -32,6 +37,10 @@
   --success: #059669;
   --warning: #d97706;
   --shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --card-grad: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 40%), var(--surface);
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 14px 30px -16px rgba(15, 23, 42, 0.22);
+  --card-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 20px 44px -18px rgba(15, 23, 42, 0.28);
+  --ring: rgba(15, 23, 42, 0.05);
 }
 
 /* ===== Adaptive accent + glow (swapped by data-mood on <html>) ===== */
@@ -81,6 +90,7 @@ body {
   background: var(--bg-glow), var(--bg-grad);
   background-attachment: fixed;
   transition: var(--mood-ease);
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -129,23 +139,35 @@ a:hover { color: var(--accent-hover); }
 
 .card,
 .glass-card {
-  background: var(--surface);
+  position: relative;
+  background: var(--card-grad);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .card:hover,
-.glass-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.glass-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: var(--card-shadow-hover);
+}
 
 .section-title {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
   font-family: var(--font-heading);
   font-weight: 700;
   margin-bottom: 0.75rem;
   color: var(--text);
+}
+.section-title > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .section-title i { color: var(--accent); }
 

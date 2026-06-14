@@ -53,24 +53,16 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
     <!-- 3. Content state -->
     <ng-container *ngIf="!error() && current() as current">
       <div class="card hero" appTilt>
+        <div class="hero-glow" aria-hidden="true"></div>
         <div class="hero-info">
-          <div class="text-label">Last saved location</div>
-          <h2 class="hero-name">{{ displayName() }}</h2>
-          <div class="text-muted">{{ displayCountry() }}</div>
+          <div class="text-label">{{ displayName() }} · {{ displayCountry() }}</div>
+          <div class="temp-row">
+            <span class="temp-value" [attr.aria-label]="current.tempC + ' degrees Celsius'">{{ current.tempC | number : '1.0-0' }}<span class="deg">°C</span></span>
+          </div>
+          <div class="condition-text">{{ current.condition.text }}</div>
+          <div class="text-muted feels">Feels like {{ current.feelslikeC | number : '1.0-0' }}°</div>
         </div>
-        <div class="hero-temp">
-          <span class="temp-value" [attr.aria-label]="current.tempC + ' degrees Celsius'">{{ current.tempC }}°C</span>
-          <div class="text-muted condition-text">{{ current.condition.text }}</div>
-        </div>
-        <img
-          *ngIf="current.condition.icon"
-          [src]="current.condition.icon"
-          [alt]="current.condition.text || 'Weather condition'"
-          loading="lazy"
-          width="96"
-          height="96"
-          class="hero-icon"
-        />
+        <i class="bi {{ glyph(current.condition.text, current.isDay) }} hero-icon" aria-hidden="true"></i>
       </div>
 
       <div class="metric-grid">
@@ -79,8 +71,11 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
           *ngFor="let metric of metrics; let i = index"
           [appReveal]="i"
         >
-          <div class="text-label">{{ metric.label }}</div>
-          <div class="metric-value">{{ metric.value }}</div>
+          <i class="bi {{ metric.icon }} metric-icon" aria-hidden="true"></i>
+          <div class="metric-body">
+            <div class="text-label">{{ metric.label }}</div>
+            <div class="metric-value">{{ metric.value }}</div>
+          </div>
         </div>
       </div>
     </ng-container>
@@ -102,52 +97,91 @@ import { TiltDirective } from '../../shared/directives/tilt.directive';
       }
 
       .hero {
-        display: flex;
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto;
         align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
         gap: 1.5rem;
-        padding: 1.75rem;
+        padding: 2rem 2.25rem;
+        overflow: hidden;
+      }
+      .hero-glow {
+        position: absolute;
+        inset: -50% 20% auto -10%;
+        height: 90%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          color-mix(in srgb, var(--accent) 28%, transparent),
+          transparent 70%
+        );
+        filter: blur(12px);
+        pointer-events: none;
       }
       .hero-info {
+        position: relative;
         min-width: 0;
+        text-align: left;
       }
-      .hero-name {
-        font-family: var(--font-heading, inherit);
-        font-weight: 700;
-        margin: 0.25rem 0 0;
-        color: var(--text);
-      }
-      .hero-temp {
-        text-align: right;
+      .temp-row {
+        margin-top: 0.3rem;
       }
       .temp-value {
-        font-size: clamp(2.5rem, 8vw, 3.75rem);
-        font-weight: 800;
-        line-height: 1;
+        font-family: var(--font-heading, inherit);
+        font-size: clamp(3.2rem, 9vw, 5rem);
+        font-weight: 700;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
         color: var(--text);
       }
+      .temp-value .deg {
+        font-size: 0.4em;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-left: 0.08em;
+      }
       .condition-text {
-        margin-top: 0.35rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-top: 0.4rem;
+      }
+      .feels {
+        font-size: 0.9rem;
+        margin-top: 0.15rem;
       }
       .hero-icon {
+        position: relative;
         flex: 0 0 auto;
+        font-size: 5rem;
+        color: var(--accent);
+        line-height: 1;
+        filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--accent) 40%, transparent));
       }
 
       .metric-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
-        margin-top: 1.25rem;
+        margin-top: 1.1rem;
       }
       .metric-tile {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
         padding: 1.1rem 1.25rem;
       }
+      .metric-icon {
+        font-size: 1.4rem;
+        color: var(--accent);
+        flex: 0 0 auto;
+      }
+      .metric-body {
+        min-width: 0;
+      }
       .metric-value {
-        font-size: 1.35rem;
+        font-size: 1.3rem;
         font-weight: 700;
         color: var(--text);
-        margin-top: 0.4rem;
+        margin-top: 0.2rem;
       }
 
       .loading-hero {
@@ -244,18 +278,30 @@ export class CurrentComponent {
     this.state.reload();
   }
 
+  /** Condition string -> Bootstrap-icon glyph (robust fallback for missing CDN icons). */
+  glyph(condition: string | undefined | null, isDay = true): string {
+    const c = (condition ?? '').toLowerCase();
+    if (/thunder|storm/.test(c)) return 'bi-cloud-lightning-rain';
+    if (/snow|sleet|ice|blizzard/.test(c)) return 'bi-cloud-snow';
+    if (/rain|drizzle|shower/.test(c)) return 'bi-cloud-rain-heavy';
+    if (/fog|mist|haze/.test(c)) return 'bi-cloud-fog2';
+    if (/cloud|overcast/.test(c)) return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+    if (/clear|sun/.test(c)) return isDay ? 'bi-sun' : 'bi-moon-stars';
+    return isDay ? 'bi-cloud-sun' : 'bi-cloud-moon';
+  }
+
   get metrics() {
     const c = this.current();
     if (!c) return [];
     return [
-      { label: 'Feels like', value: `${c.feelslikeC}°C` },
-      { label: 'Wind', value: `${c.windKph} kph ${c.windDir}` },
-      { label: 'Pressure', value: `${c.pressureMb} mb` },
-      { label: 'Humidity', value: `${c.humidity}%` },
-      { label: 'Visibility', value: `${c.visKm} km` },
-      { label: 'Clouds', value: `${c.cloud}%` },
-      { label: 'UV Index', value: `${c.uv}` },
-      { label: 'Precipitation', value: `${c.precipMm} mm` },
+      { label: 'Feels like', value: `${Math.round(c.feelslikeC)}°C`, icon: 'bi-thermometer-half' },
+      { label: 'Wind', value: `${Math.round(c.windKph)} kph ${c.windDir}`.trim(), icon: 'bi-wind' },
+      { label: 'Pressure', value: `${Math.round(c.pressureMb)} mb`, icon: 'bi-speedometer2' },
+      { label: 'Humidity', value: `${c.humidity}%`, icon: 'bi-droplet-half' },
+      { label: 'Visibility', value: `${Math.round(c.visKm)} km`, icon: 'bi-eye' },
+      { label: 'Clouds', value: `${c.cloud}%`, icon: 'bi-clouds' },
+      { label: 'UV Index', value: `${c.uv}`, icon: 'bi-brightness-high' },
+      { label: 'Precipitation', value: `${c.precipMm} mm`, icon: 'bi-cloud-drizzle' },
     ];
   }
 }

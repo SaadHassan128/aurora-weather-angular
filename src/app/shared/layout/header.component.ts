@@ -113,8 +113,8 @@ import { LocationSummary } from '../../core/models/weather.models';
 
 @media (max-width: 991px) {
   .nav-toggle { display: inline-flex; margin-left: auto; }
-  .nav-links { position: fixed; inset: 64px 0 0 auto; width: min(82vw, 320px); flex-direction: column; align-items: stretch; background: var(--surface); border-left: 1px solid var(--border); padding: 1rem; gap: 0.25rem; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; }
-  .nav-links.open { transform: translateX(0); }
+  .nav-links { position: fixed; inset: 64px 0 0 auto; width: min(82vw, 320px); max-width: 100vw; flex-direction: column; align-items: stretch; background: var(--surface); border-left: 1px solid var(--border); padding: 1rem; gap: 0.25rem; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), visibility 0.3s; visibility: hidden; overflow-y: auto; overscroll-behavior: contain; }
+  .nav-links.open { transform: translateX(0); visibility: visible; }
   .more-menu { position: static; display: flex; box-shadow: none; border: none; padding-left: 0.5rem; }
   .nav-right { margin-left: 0; flex-wrap: wrap; }
   .qs-input { min-width: 0; width: 100%; }
